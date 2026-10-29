@@ -1,6 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import type { ModuleEntry } from './modules-config'
+import { createResolver } from './resolver'
 import {
   builtInEnableCommand,
   builtInPresetText,
@@ -39,6 +40,7 @@ import { parseModuleInfoArgs, parseModuleSearchArgs } from './module-search-args
 
 export const DEFAULT_MODULES_INDEX_URL = 'https://modules.openmercato.com/modules.json'
 export const MODULES_SITE_URL = 'https://modules.openmercato.com'
+export const MODULE_INDEX_MAX_BYTES = 10 * 1024 * 1024
 export const MODULE_INDEX_TIMEOUT_MS = 4000
 export const MODULE_INDEX_TTL_MS = 10 * 60 * 1000
 export const MODULE_INDEX_CACHE_FILE = path.join('.mercato', 'cache', 'modules-index.json')
@@ -50,12 +52,13 @@ export type FetchResponseLike = {
   status: number
   ok: boolean
   headers: { get(name: string): string | null }
+  body?: ReadableStream<Uint8Array> | null
   json(): Promise<unknown>
 }
 
 export type FetchLike = (
   input: string,
-  init?: { headers?: Record<string, string>; signal?: AbortSignal },
+  init?: { headers?: Record<string, string>; signal?: AbortSignal; redirect?: 'manual' },
 ) => Promise<FetchResponseLike>
 
 export type LoadedModuleIndex = {
@@ -312,6 +315,14 @@ function writeCache(file: string, cache: CacheFile): void {
   }
 }
 
+function validateIndexUrl(value: string): void {
+  const url = new URL(value)
+  const local = url.hostname === 'localhost' || url.hostname === '127.0.0.1' || url.hostname === '[::1]'
+  if (url.protocol !== 'https:' && !(url.protocol === 'http:' && local)) {
+    throw new Error('[internal] Module index URL must use HTTPS except on loopback hosts')
+  }
+}
+
 async function fetchOnce(
   fetchImpl: FetchLike,
   url: string,
@@ -320,7 +331,50 @@ async function fetchOnce(
 ): Promise<FetchResponseLike> {
   const headers: Record<string, string> = { accept: 'application/json' }
   if (etag) headers['if-none-match'] = etag
-  return fetchImpl(url, { headers, signal: AbortSignal.timeout(timeoutMs) })
+  const signal = AbortSignal.timeout(timeoutMs)
+  let target = url
+  for (let redirects = 0; redirects <= 5; redirects += 1) {
+    validateIndexUrl(target)
+    const response = await fetchImpl(target, { headers, signal, redirect: 'manual' })
+    if (![301, 302, 303, 307, 308].includes(response.status)) return response
+    await response.body?.cancel()
+    const location = response.headers.get('location')
+    if (!location || redirects === 5) throw new Error('[internal] Invalid or excessive module index redirects')
+    target = new URL(location, target).toString()
+  }
+  throw new Error('[internal] Excessive module index redirects')
+}
+
+async function readBoundedJson(response: FetchResponseLike): Promise<unknown> {
+  const tooLarge = () => new Error(`[internal] Module index exceeds ${MODULE_INDEX_MAX_BYTES} bytes`)
+  const length = Number(response.headers.get('content-length'))
+  if (length > MODULE_INDEX_MAX_BYTES) {
+    await response.body?.cancel()
+    throw tooLarge()
+  }
+  if (!response.body) {
+    const value = await response.json()
+    if (Buffer.byteLength(JSON.stringify(value) ?? '') > MODULE_INDEX_MAX_BYTES) throw tooLarge()
+    return value
+  }
+  const reader = response.body.getReader()
+  const chunks: Uint8Array[] = []
+  let bytes = 0
+  try {
+    while (true) {
+      const chunk = await reader.read()
+      if (chunk.done) break
+      bytes += chunk.value.byteLength
+      if (bytes > MODULE_INDEX_MAX_BYTES) {
+        await reader.cancel()
+        throw tooLarge()
+      }
+      chunks.push(chunk.value)
+    }
+    return JSON.parse(Buffer.concat(chunks).toString('utf8'))
+  } finally {
+    reader.releaseLock()
+  }
 }
 
 async function fetchWithRetry(
@@ -334,6 +388,7 @@ async function fetchWithRetry(
     try {
       const response = await fetchOnce(fetchImpl, url, etag, timeoutMs)
       if (response.status >= 500) {
+        await response.body?.cancel()
         lastError = new Error(`${url} answered ${response.status}`)
         continue
       }
@@ -355,7 +410,7 @@ async function fetchJson<T>(
   const response = await fetchWithRetry(fetchImpl, url, etag, timeoutMs)
   if (response.status === 304) return { notModified: true }
   if (!response.ok) throw new Error(`${url} answered ${response.status}`)
-  const value = parse(await response.json())
+  const value = parse(await readBoundedJson(response))
   if (value === null) throw new Error(`${url} is not a module index this CLI understands`)
   return { notModified: false, value, etag: response.headers.get('etag') }
 }
@@ -370,7 +425,14 @@ function searcherOf(index: CatalogIndex, builtIn: BuiltInIndex | null): CatalogS
 
 export async function loadIndex(options: LoadIndexOptions): Promise<LoadedModuleIndex> {
   const url = options.url ?? DEFAULT_MODULES_INDEX_URL
-  const builtInUrl = options.builtInUrl ?? defaultBuiltInUrl(url)
+  let builtInUrl: string
+  try {
+    validateIndexUrl(url)
+    builtInUrl = options.builtInUrl ?? defaultBuiltInUrl(url)
+    validateIndexUrl(builtInUrl)
+  } catch (error: unknown) {
+    throw new ModuleIndexUnavailableError(error instanceof Error ? error.message : String(error))
+  }
   const timeoutMs = options.timeoutMs ?? MODULE_INDEX_TIMEOUT_MS
   const ttlMs = options.ttlMs ?? MODULE_INDEX_TTL_MS
   const fetchImpl: FetchLike = options.fetchImpl ?? ((input, init) => fetch(input, init))
@@ -543,18 +605,20 @@ export function buildSearchView(
   app: AppContext,
 ): ModuleSearchView {
   const resolved = app.omVersion ? resolveLine(app.omVersion, searcher.index.lines) : null
-  const ranked = rankModules(searcher, {
+  const rankInput = {
     query: request.query ?? '',
     ...(app.omVersion ? { omVersion: app.omVersion } : {}),
     ...(request.category ? { category: request.category } : {}),
     ...(request.kinds ? { kind: request.kinds } : {}),
-  })
-  const line = ranked.line
+  }
+  const unfiltered = rankModules(searcher, rankInput)
+  const line = unfiltered.line
   const allLines = request.allLines === true || line === null
-  // the nightly run installs modules only, so providers, libraries and tools stay listed with their status on the line
-  const kept = ranked.modules.filter(
-    (hit) => allLines || hit.meta.entry.kind !== 'module' || (line !== null && Boolean(hit.meta.entry.version.recommended[line])),
-  )
+  const ranked = allLines ? unfiltered : rankModules(searcher, { ...rankInput, verifiedModulesOnly: true })
+  const kept = ranked.modules
+  const hidden = allLines ? 0 : unfiltered.modules.filter(
+    (hit) => hit.meta.entry.kind === 'module' && (line === null || !hit.meta.entry.version.recommended[line]),
+  ).length
   const limit = Math.min(SEARCH_MAX_LIMIT, Math.max(1, Math.floor(request.limit ?? 10)))
   const results = kept.slice(0, limit).map((hit) => toModuleCard(searcher, hit, line, ranked.latest))
   const entries = new Map<string, CatalogEntry>()
@@ -572,8 +636,8 @@ export function buildSearchView(
       omVersion: app.omVersion,
       results,
       builtIn,
-      total: ranked.modules.length,
-      hidden: ranked.modules.length - kept.length,
+      total: unfiltered.modules.length,
+      hidden,
       dataVersion: searcher.index.dataVersion,
       generatedAt: searcher.index.generatedAt,
       receiptSource: receiptSourceOf(searcher),
@@ -867,7 +931,7 @@ type LoadedForCommand = { searcher: CatalogSearcher; app: AppContext; builtInUna
 
 async function loadForCommand(deps: ModuleSearchDeps): Promise<LoadedForCommand> {
   const env = deps.env ?? process.env
-  const appRoot = deps.appRoot ?? process.cwd()
+  const appRoot = deps.appRoot ?? createResolver().getAppDir()
   const stderr = deps.stderr ?? ((line: string) => console.error(line))
   const url = env.OM_MODULES_INDEX_URL?.trim() || DEFAULT_MODULES_INDEX_URL
   const builtInUrl = env.OM_MODULES_BUILTIN_URL?.trim() || undefined

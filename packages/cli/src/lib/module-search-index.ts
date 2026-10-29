@@ -170,6 +170,7 @@ export type SearchModulesInput = {
   type?: OriginType[]
   kind?: (EntryKind | 'built-in')[]
   verifiedOnly?: boolean
+  verifiedModulesOnly?: boolean
   includeBuiltIn?: boolean
   includeExamples?: boolean
   emits?: string
@@ -384,7 +385,7 @@ export function latestLine(lines: readonly CatalogLine[]): CatalogLine | null {
   return lines.find((line) => line.source === 'latest') ?? null
 }
 
-const SEMVER = /^(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?(?:\+[0-9A-Za-z.-]+)?$/
+const SEMVER = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$/
 
 export function resolveLine(
   omVersion: string | null | undefined,
@@ -397,14 +398,18 @@ export function resolveLine(
   const byKey = lines.find((line) => line.key === raw)
   if (byKey) return found(byKey)
   const version = raw.replace(/^(?:v|=|\^|~|>=)\s*/, '')
+  const semver = SEMVER.exec(version)
+  const lineKey = /^(0|[1-9]\d*)\.(0|[1-9]\d*)$/.exec(version)
+  if ((!semver && !lineKey) || semver?.[4]?.split('.').some((part) => /^0\d+$/.test(part))) {
+    return { line: null, version: null, note: 'Unknown Open Mercato version.' }
+  }
   const exact = lines.find((line) => line.version === version)
   if (exact) return found(exact)
-  const semver = SEMVER.exec(version)
   if (semver && semver[4] && /(^|[.-])develop([.-]|$)/.test(semver[4])) {
     const next = lines.find((line) => line.source === 'develop')
     if (next) return found(next)
   }
-  const majorMinor = /^(\d+)\.(\d+)(?:\.\d+)?(?:-[0-9A-Za-z.-]+)?$/.exec(version)
+  const majorMinor = semver ?? lineKey
   if (!majorMinor) return { line: null, version: null, note: 'Unknown Open Mercato version.' }
   const key = `${Number(majorMinor[1])}.${Number(majorMinor[2])}`
   const line = lines.find((candidate) => candidate.key === key)
@@ -762,6 +767,7 @@ export function rankModules(searcher: CatalogSearcher, rawInput: SearchModulesIn
       (!input.type || input.type.includes(entry.type)) &&
       (!wantKinds || wantKinds.includes(entry.kind)) &&
       (!input.verifiedOnly || (line !== null && statusOn(entry, line) === 'verified')) &&
+      (!input.verifiedModulesOnly || entry.kind !== 'module' || (line !== null && Boolean(entry.version.recommended[line]))) &&
       (!input.emits || meta.ids.emits.includes(input.emits)) &&
       (!input.consumes || meta.ids.consumes.includes(input.consumes)) &&
       (!provider || entry.providers.some(providerMatches))

@@ -30,13 +30,15 @@ yarn mercato module search [<query>] [--category <id>] [--kind <kind>] [--all-li
 yarn mercato module info <package-or-module-id> [--json]
 ```
 
+- App root: `createResolver().getAppDir()`, matching module add/enable; outside an app the resolver keeps the working directory. Explicit injected app roots take precedence.
 - Line of the app: `node_modules/@open-mercato/core/package.json`, else the `@open-mercato/core` range in
   `package.json`; mapped to a catalog line (`0.9`, `next` for develop builds). A version the catalog does not test
-  shows every line with a note.
+  shows every line with a note. Version parsing follows the catalog: no build metadata or leading-zero numeric prerelease identifiers.
 - Default filter: catalog entries verified on that line (`version.recommended[line]`, so a new release in the Yarn
   age gate does not hide a module) plus built-in modules; the rest is counted in `hidden` and named in one closing
   line (`N more modules are listed but not verified on 0.9. Use --all-lines.`). When every match is hidden the
   first line says `No modules verified on <line> matched "<query>".`
+- The module-only line filter participates in ranking before AND/OR fill and typo retry. `hidden` and `total` come from an independent unfiltered pass; its selected matches can differ from the filtered pass. Providers, libraries, tools and built-ins remain eligible.
 - Ranking follows the catalog's `search_modules`: stop words (`when`, `use`, `for` and others) are dropped, AND
   first, then OR hits without weak fuzzy or prefix matches, then one swapped pair of letters (`didYouMean`). A
   `--category` or `--kind` without a query lists what the filter picks, in the catalog's relevance order.
@@ -56,6 +58,8 @@ mercato.ts module search|info (no bootstrap, no DB, no generators)
 
 Network: `OM_MODULES_INDEX_URL` or `https://modules.openmercato.com/modules.json`, `built-in.json` next to it
 (`OM_MODULES_BUILTIN_URL` to override); 4 s timeout, one retry after a network error or a 5xx.
+Both URLs and each redirect must use HTTPS, except HTTP on `localhost`, `127.0.0.1` or `[::1]`.
+Downloads are capped at 10 MiB each using Content-Length and actual streamed bytes; oversized downloads preserve a usable stale cache. Redirect chains stop after five hops. The injected JSON-only fetch seam remains supported, with a serialized-size check.
 
 ## Data Models
 
@@ -157,3 +161,5 @@ exit code 2 with its reason, `OM_MODULES_INDEX_URL`, `module info` text and JSON
   published anatomy; `--json` keeps the bare
   command of `tools@1`. `src/modules.ts` is read with the command's environment and keeps only active registrations.
   `module info --json` warnings use the app line, not the latest one.
+
+- 2026-10-29 (#8124, follow-up dependent on #8117): Filter verified modules during ranking, retain unfiltered hidden counts, resolve the app root, reject non-catalog version forms, and bound downloads by size and HTTPS. Regression tests cover all four items; command names, flags and JSON fields remain unchanged.
