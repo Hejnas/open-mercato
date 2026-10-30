@@ -12,7 +12,7 @@ import { resolveTranslations } from '@open-mercato/shared/lib/i18n/server'
 import { enforceTenantSelection, resolveIsSuperAdmin } from '@open-mercato/core/modules/auth/lib/tenantAccess'
 import { escapeLikePattern } from '@open-mercato/shared/lib/db/escapeLikePattern'
 import { assertActorCanGrantRoles } from '@open-mercato/core/modules/auth/lib/grantChecks'
-import { isOrganizationAccessAllowed } from '@open-mercato/shared/lib/auth/organizationAccess'
+import { isOrganizationAccessAllowed, isUnrestrictedOrganizationScope } from '@open-mercato/shared/lib/auth/organizationAccess'
 import type { CreateApiKeyCommandInput } from '../../commands/keys'
 
 const listQuerySchema = z.object({
@@ -72,18 +72,15 @@ function json(payload: unknown, init: ResponseInit = { status: 200 }) {
   })
 }
 
-/**
- * Which keys an actor may list: the selected organizations' keys, plus the
- * tenant-wide keys (saved with no organization) for the actors the create and
- * delete routes trust with them: a superadmin, or an actor with no
- * organization allowlist. Null when no organization is selected.
- */
 async function listOrganizationFilter(ctx: CrudCtx, organizationIds: string[] | null): Promise<QBFilterQuery<ApiKey> | null> {
   const selected = organizationIds && organizationIds.length > 0 ? organizationIds : ctx.auth?.orgId ? [ctx.auth.orgId] : null
   if (!selected) return null
   const byOrganization: QBFilterQuery<ApiKey> = { organizationId: { $in: selected } }
   const allowedIds = ctx.organizationScope?.allowedIds ?? null
-  const seesTenantWide = !Array.isArray(allowedIds) || (await resolveIsSuperAdmin(ctx))
+  const seesTenantWide = isUnrestrictedOrganizationScope({
+    isSuperAdmin: await resolveIsSuperAdmin(ctx),
+    allowedOrganizationIds: allowedIds,
+  })
   return seesTenantWide ? { $or: [byOrganization, { organizationId: null }] } : byOrganization
 }
 

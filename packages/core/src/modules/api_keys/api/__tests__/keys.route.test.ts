@@ -254,6 +254,20 @@ describe('API Keys route', () => {
     })
   })
 
+  it('lists tenant-wide keys for a superadmin with an organization allowlist', async () => {
+    mockRbac.loadAcl.mockResolvedValue({ isSuperAdmin: true })
+    const response = await getHandler(new Request('http://localhost/api/api_keys/keys?search=tenant-wide'))
+    expect(response.status).toBe(200)
+    const clauses = mockQueryBuilder.andWhere.mock.calls.map(([clause]) => clause)
+    expect(clauses).toContainEqual({ tenantId: '123e4567-e89b-12d3-a456-426614174000' })
+    expect(clauses).toContainEqual({
+      $or: [{ organizationId: { $in: ['aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'] } }, { organizationId: null }],
+    })
+    expect(clauses).toContainEqual({
+      $or: [{ name: { $ilike: '%tenant-wide%' } }, { keyPrefix: { $ilike: '%tenant-wide%' } }],
+    })
+  })
+
   it('hides tenant-wide keys from an organization-restricted actor', async () => {
     mockResolveScope.mockResolvedValue({
       selectedId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',

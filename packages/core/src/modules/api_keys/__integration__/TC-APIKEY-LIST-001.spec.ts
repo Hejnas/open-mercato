@@ -10,7 +10,7 @@ import {
   deleteUserIfExists,
   setRoleAclFeatures,
 } from '@open-mercato/core/helpers/integration/authFixtures'
-import { expectId, getTokenContext, readJsonSafe } from '@open-mercato/core/helpers/integration/generalFixtures'
+import { deleteGeneralEntityIfExists, expectId, getTokenContext, readJsonSafe } from '@open-mercato/core/helpers/integration/generalFixtures'
 
 type KeyListBody = { items?: Array<{ id?: string }> }
 
@@ -31,26 +31,15 @@ async function listKeyIds(
   search: string,
   cookie?: string,
 ): Promise<string[]> {
-  const response = await request.fetch(`/api/api_keys/keys?search=${encodeURIComponent(search)}`, {
-    method: 'GET',
-    headers: {
-      Authorization: `Bearer ${token}`,
-      ...(cookie ? { Cookie: cookie } : {}),
-    },
+  const response = await apiRequest(request, 'GET', `/api/api_keys/keys?search=${encodeURIComponent(search)}`, {
+    token,
+    headers: cookie ? { Cookie: cookie } : undefined,
   })
   expect(response.status(), 'GET /api/api_keys/keys should return 200').toBe(200)
   const body = await readJsonSafe<KeyListBody>(response)
   return (body?.items ?? []).map((item) => item.id).filter((id): id is string => typeof id === 'string')
 }
 
-/**
- * TC-APIKEY-LIST-001 [P1]: tenant-wide API keys are listed only for actors trusted with them
- *
- * A key saved with no organization is tenant-wide. With an organization selected, a
- * superadmin and an actor without an organization allowlist see it next to the selected
- * organization's keys (so it can be revoked from the list), while an organization-restricted
- * actor still sees only the keys of its allowed organizations.
- */
 test.describe('TC-APIKEY-LIST-001: tenant-wide key visibility in the API-key list', () => {
   test('lists tenant-wide keys for unrestricted actors only', async ({ request }) => {
     const superadminToken = await getAuthToken(request, 'superadmin')
@@ -61,6 +50,12 @@ test.describe('TC-APIKEY-LIST-001: tenant-wide key visibility in the API-key lis
     const search = `qa-tc-apikey-list-001-${stamp}`
     const password = 'StrongSecret123!'
     const keyIds: string[] = []
+    let foreignTenantId: string | null = null
+    let foreignOrganizationId: string | null = null
+    let foreignRoleId: string | null = null
+    let foreignUserId: string | null = null
+    let foreignToken: string | null = null
+    let foreignKeyId: string | null = null
     let organizationId: string | null = null
     let unrestrictedRoleId: string | null = null
     let restrictedRoleId: string | null = null
@@ -84,6 +79,43 @@ test.describe('TC-APIKEY-LIST-001: tenant-wide key visibility in the API-key lis
         organizationId,
       })
       keyIds.push(organizationKeyId)
+
+      const tenantResponse = await apiRequest(request, 'POST', '/api/directory/tenants', {
+        token: superadminToken,
+        data: { name: `QA TC-APIKEY-LIST-001 foreign tenant ${stamp}` },
+      })
+      const tenantBody = await readJsonSafe<{ id?: string }>(tenantResponse)
+      expect(tenantResponse.status(), 'Foreign tenant fixture should be created').toBe(201)
+      foreignTenantId = expectId(tenantBody?.id, 'Tenant creation response should include id')
+      foreignOrganizationId = await createOrganizationFixture(request, superadminToken, {
+        name: `QA TC-APIKEY-LIST-001 foreign organization ${stamp}`,
+        tenantId: foreignTenantId,
+      })
+      foreignRoleId = await createRoleFixture(request, superadminToken, {
+        name: `qa-tc-apikey-list-001-foreign-${stamp}`,
+        tenantId: foreignTenantId,
+      })
+      await setRoleAclFeatures(request, superadminToken, {
+        roleId: foreignRoleId,
+        features: ['api_keys.view', 'api_keys.create', 'api_keys.delete'],
+        organizations: null,
+      })
+      const foreignEmail = `qa-tc-apikey-list-001-foreign-${stamp}@example.com`
+      foreignUserId = await createUserFixture(request, superadminToken, {
+        email: foreignEmail,
+        password,
+        organizationId: foreignOrganizationId,
+        roles: [foreignRoleId],
+        name: 'QA TC-APIKEY-LIST-001 Foreign',
+      })
+      foreignToken = await getAuthToken(request, foreignEmail, password)
+      foreignKeyId = await createKey(request, foreignToken, {
+        name: `${search} foreign tenant-wide`,
+        tenantId: foreignTenantId,
+        organizationId: null,
+      })
+      expect(await listKeyIds(request, foreignToken, search), 'Foreign actor should see only its own tenant key')
+        .toEqual([foreignKeyId])
 
       const selectedOrganizationCookie = `om_selected_org=${encodeURIComponent(organizationId)}`
       const superadminIds = await listKeyIds(request, superadminToken, search, selectedOrganizationCookie)
@@ -134,6 +166,15 @@ test.describe('TC-APIKEY-LIST-001: tenant-wide key visibility in the API-key lis
       expect(restrictedIds, 'An organization-restricted actor must not see the tenant-wide key')
         .toEqual([organizationKeyId])
     } finally {
+      if (foreignKeyId && foreignToken) {
+        await apiRequest(request, 'DELETE', `/api/api_keys/keys?id=${encodeURIComponent(foreignKeyId)}`, {
+          token: foreignToken,
+        }).catch(() => undefined)
+      }
+      await deleteUserIfExists(request, superadminToken, foreignUserId)
+      await deleteRoleIfExists(request, superadminToken, foreignRoleId)
+      await deleteOrganizationIfExists(request, superadminToken, foreignOrganizationId)
+      await deleteGeneralEntityIfExists(request, superadminToken, '/api/directory/tenants', foreignTenantId)
       for (const keyId of keyIds) {
         await apiRequest(request, 'DELETE', `/api/api_keys/keys?id=${encodeURIComponent(keyId)}`, {
           token: superadminToken,
