@@ -3923,7 +3923,7 @@ function DataTableImpl<T extends RowData>({
                     style={fixedWidthStyle(resolveHeaderWidth(BULK_SELECT_WIDTH_KEY))}
                   >
                     <Checkbox
-                      checked={table.getIsAllPageRowsSelected()}
+                      checked={table.getIsAllPageRowsSelected() ? true : table.getIsSomePageRowsSelected() ? 'indeterminate' : false}
                       onCheckedChange={(checked) => {
                         table.toggleAllPageRowsSelected(Boolean(checked))
                       }}
