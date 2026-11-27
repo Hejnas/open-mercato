@@ -157,6 +157,19 @@
     writeHash()
   }
 
+  var showBanner = false
+  var currentView = 'list'
+
+  function placeBanner() {
+    var config = VIEWS[currentView] || VIEWS.list
+    var banner = document.getElementById('banner')
+    if (config.tableOnly) {
+      var main = document.getElementById(config.main)
+      if (banner.parentNode !== main) main.insertBefore(banner, main.firstChild)
+    }
+    banner.hidden = !(showBanner && config.tableOnly)
+  }
+
   var VIEWS = {
     list: { main: 'view-list', crumb: 'People', tableOnly: true, nav: 'list' },
     deals: { main: 'view-deals', crumb: 'Deals', tableOnly: true, nav: 'deals' },
@@ -177,6 +190,8 @@
       if (active) item.setAttribute('aria-current', 'page')
       else item.removeAttribute('aria-current')
     })
+    currentView = view
+    placeBanner()
     document.getElementById('crumb-here').textContent = config.crumb
     document.getElementById('screen').value = view
     window.scrollTo(0, 0)
@@ -271,9 +286,9 @@
   })
 
   document.getElementById('t-banner').addEventListener('click', function (event) {
-    var banner = document.getElementById('banner')
-    banner.hidden = !banner.hidden
-    event.currentTarget.setAttribute('aria-checked', banner.hidden ? 'false' : 'true')
+    showBanner = !showBanner
+    event.currentTarget.setAttribute('aria-checked', showBanner ? 'true' : 'false')
+    placeBanner()
   })
 
   document.getElementById('t-demo').addEventListener('click', function (event) {
