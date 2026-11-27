@@ -154,16 +154,58 @@
     writeHash()
   }
 
+  var VIEWS = {
+    list: { main: 'view-list', crumb: 'People', tableOnly: true, nav: 'list' },
+    roles: { main: 'view-roles', crumb: 'Team roles', tableOnly: true, nav: 'roles' },
+    form: { main: 'view-form', crumb: 'Mia Johnson', tableOnly: false, nav: 'list' },
+    overview: { main: 'view-overview', crumb: 'Sales overview', tableOnly: false, nav: 'overview' },
+  }
+
   function setScreen(view) {
-    var isList = view === 'list'
-    app.classList.toggle('view-list', isList)
-    app.classList.toggle('view-form', !isList)
-    document.getElementById('view-list').hidden = !isList
-    document.getElementById('view-form').hidden = isList
-    document.getElementById('crumb-here').textContent = isList ? 'People' : 'Mia Johnson'
+    var config = VIEWS[view] || VIEWS.list
+    app.classList.toggle('view-list', config.tableOnly)
+    Object.keys(VIEWS).forEach(function (key) {
+      document.getElementById(VIEWS[key].main).hidden = VIEWS[key].main !== config.main
+    })
+    document.querySelectorAll('.nav-item[data-view]').forEach(function (item) {
+      var active = item.getAttribute('data-view') === config.nav
+      item.classList.toggle('active', active)
+      if (active) item.setAttribute('aria-current', 'page')
+      else item.removeAttribute('aria-current')
+    })
+    document.getElementById('crumb-here').textContent = config.crumb
     document.getElementById('screen').value = view
     window.scrollTo(0, 0)
     refresh()
+  }
+
+  function buildStaticTables() {
+    var roles = [
+      ['Account executive', 'Owns new business deals from first call to signature', 6],
+      ['Sales manager', 'Reviews pipeline and approves discounts', 2],
+      ['Customer success', 'Onboards new customers and runs quarterly reviews', 4],
+      ['Support agent', 'Handles tickets and warranty claims', 5],
+      ['Field technician', 'Installs and services equipment on site', 8],
+      ['Warehouse lead', 'Plans picking and outbound shipments', 2],
+      ['Finance', 'Invoices, payments and credit limits', 3],
+      ['Marketing', 'Campaigns, events and lead sources', 3],
+      ['Procurement', 'Supplier orders and price lists', 2],
+      ['Administrator', 'Users, roles and system settings', 1],
+      ['Partner manager', 'Reseller onboarding and referrals', 2],
+      ['Intern', 'Read-only access to customers and deals', 4],
+    ]
+    document.getElementById('roles-rows').innerHTML = roles.map(function (role) {
+      return '<tr><td><div class="cell"><a class="cell-name" href="#">' + role[0] + '</a></div></td><td><div class="cell">' + role[1] +
+        '</div></td><td class="num">' + role[2] + '</td><td class="col-actions"><button type="button" class="btn btn-ghost btn-icon btn-sm" aria-label="Row actions"><svg><use href="#ic-more"/></svg></button></td></tr>'
+    }).join('')
+    var accounts = [['Brightside Solar', 'Anna Kowal', '10/12/2026'], ['Copperleaf Design', 'Dev Patel', '10/30/2026'], ['Harborview Analytics', 'Ben Ortiz', '11/2/2026'], ['Northwind Traders', 'Chloe Martin', '11/9/2026']]
+    document.getElementById('overview-accounts').innerHTML = accounts.map(function (row) {
+      return '<tr><td>' + row[0] + '</td><td>' + row[1] + '</td><td class="num">' + row[2] + '</td></tr>'
+    }).join('')
+    var deals = [['Sunset Lofts Battery Upgrade', 'Offering', '82,000 USD', '12/24/2026'], ['Redwood Solar Rollout', 'Negotiations', '185,000 USD', '12/4/2026'], ['Wanderstay Renovation', 'Qualified', '145,000 USD', '11/24/2026'], ['Midwest Outfitters Expansion', 'Opportunity', '210,000 USD', '12/17/2026']]
+    document.getElementById('overview-deals').innerHTML = deals.map(function (row) {
+      return '<tr><td>' + row[0] + '</td><td><span class="pill pill-secondary">' + row[1] + '</span></td><td class="num">' + row[2] + '</td><td class="num">' + row[3] + '</td></tr>'
+    }).join('')
   }
 
   document.querySelectorAll('[data-mode]').forEach(function (button) {
@@ -247,6 +289,7 @@
   window.addEventListener('resize', function () { applySimulation(); updateWidthStat(); updateShadows() })
 
   buildHead()
+  buildStaticTables()
   applySimulation()
   readHash()
   renderRows()

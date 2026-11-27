@@ -207,6 +207,8 @@ body:not(.demo-mode) .chat-bubble { display: none; }
 
 /* ── After: full width for table-only views ───────────────────── */
 .opt-width .view-list .content { max-width: none; margin-inline: 0; }
+/* The card grows only as wide as its columns need, anchored to the left */
+.opt-width .view-list .dt { align-self: flex-start; width: fit-content; max-width: calc(100% - 1rem); }
 
 /* ── After: pinned pagination, only the table body scrolls (desktop) ── */
 @media (min-width: 1024px) {
@@ -217,6 +219,14 @@ body:not(.demo-mode) .chat-bubble { display: none; }
   .opt-pager .view-list .dt-head, .opt-pager .view-list .dt-foot { flex: none; }
   .opt-pager .view-list .dt-scroll { flex: 1 1 auto; min-height: 0; }
 }
+
+/* ── Multi-section view (stays capped in every mode) ──────────── */
+.overview-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+@media (min-width: 1024px) { .overview-grid { grid-template-columns: 1fr 1fr; } }
+.overview-grid p { margin: 0; line-height: 1.6; }
+.form-head p { margin: 0.25rem 0 0; font-size: 0.875rem; }
+.mini-table { width: 100%; }
+.mini-table td { height: auto; }
 
 /* ── Detail / form view (stays capped in every mode) ──────────── */
 .form-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
@@ -254,7 +264,8 @@ body:not(.demo-mode) .chat-bubble { display: none; }
 .proposal .segmented > button { flex: 1; }
 .toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
 .toggle-row label { cursor: pointer; }
-.proposal .select { min-height: 1.75rem; padding: 0.125rem 0.5rem; width: auto; font-size: 0.75rem; }
+.proposal .select { min-height: 1.75rem; padding: 0.125rem 0.5rem; width: auto; max-width: 8.5rem; font-size: 0.75rem; }
+.proposal { overflow-x: hidden; }
 .proposal-stat { padding: 0.5rem; border-radius: var(--radius-md); background: var(--muted); color: var(--muted-foreground); line-height: 1.4; }
 .proposal-stat b { color: var(--foreground); }
 .proposal-link { color: var(--muted-foreground); }

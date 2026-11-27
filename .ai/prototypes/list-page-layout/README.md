@@ -19,7 +19,8 @@ This is a static HTML mockup, not implementation. It uses the app's own tokens: 
 - Acceptance:
   - A page opts in explicitly, e.g. `contentWidth: 'full'` in its page metadata. The default stays exactly as today, so pages and third-party modules that do not opt in are unchanged.
   - Opt in only where the table is the only element of the view (People, Companies, …).
-  - Forms, detail pages and views with several sections keep the 1536 px cap. Check **Screen → Person form**.
+  - The table grows only as wide as its columns need and stays anchored to the left; the full width is only the upper limit. A table with four columns does not stretch across a 2560 px screen. Check **Screen → Team roles**.
+  - Forms, detail pages and views with several sections keep the 1536 px cap. Check **Screen → Person form** and **Screen → Sales overview**.
 - Proposed rule in `.ai/ds-rules.md`: keep "Constrain max content width → `max-w-screen-2xl mx-auto`" and add "Exception: a view whose only element is a DataTable uses the full content width." Issue #8640 asks for the same.
 
 ### 2. Pinned pagination, only the table body scrolls
@@ -29,7 +30,8 @@ This is a static HTML mockup, not implementation. It uses the app's own tokens: 
 - Today the whole page scrolls, so the column headers and the pagination scroll out of view.
 - Acceptance:
   - On desktop (≥ 1024 px) the table fills the remaining height. Its body scrolls, while the headers and the pagination stay in place.
-  - With few rows, the table shrinks and the pagination sits right below them. Set the page size to **6 per page**.
+  - The mockup shows 100 rows per page by default, where the difference is most visible.
+  - With few rows, the table shrinks and the pagination sits right below them. Set the page size to **6 per page**, or open **Team roles**.
   - A message above the table reduces the table's height instead of pushing the pagination off screen. Turn on **Show an alert above the table**.
   - There is only one vertical scrollbar.
   - Below 1024 px nothing changes; the page scrolls as today.

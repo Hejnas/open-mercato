@@ -45,6 +45,7 @@
     <div class="sidebar-search"><svg><use href="#ic-search"/></svg><span class="label">Search…</span></div>
     <div class="nav-group"><span class="label">Customers</span><svg><use href="#ic-chevron-down"/></svg></div>
     <div class="nav-items">
+      <button type="button" class="nav-item" data-view="overview"><svg><use href="#ic-home"/></svg><span class="label">Sales overview</span></button>
       <button type="button" class="nav-item"><svg><use href="#ic-building"/></svg><span class="label">Companies</span></button>
       <button type="button" class="nav-item"><svg><use href="#ic-calendar"/></svg><span class="label">Calendar</span></button>
       <button type="button" class="nav-item active" data-view="list" aria-current="page"><svg><use href="#ic-users"/></svg><span class="label">People</span></button>
@@ -52,6 +53,7 @@
     </div>
     <div class="nav-group"><span class="label">Settings</span><svg><use href="#ic-chevron-down"/></svg></div>
     <div class="nav-items">
+      <button type="button" class="nav-item" data-view="roles"><svg><use href="#ic-users"/></svg><span class="label">Team roles</span></button>
       <button type="button" class="nav-item"><svg><use href="#ic-settings"/></svg><span class="label">System</span></button>
     </div>
   </aside>
@@ -127,9 +129,9 @@
           </nav>
           <select class="select page-size" id="page-size" aria-label="Rows per page">
             <option value="6">6 per page</option>
-            <option value="20" selected>20 per page</option>
+            <option value="20">20 per page</option>
             <option value="50">50 per page</option>
-            <option value="100">100 per page</option>
+            <option value="100" selected>100 per page</option>
           </select>
         </div>
       </section>
@@ -159,6 +161,80 @@
           <div class="field"><label for="f-status">Status</label><select class="select" id="f-status"><option>Active</option><option>Inactive</option></select></div>
           <div class="field"><label for="f-stage">Lifecycle stage</label><select class="select" id="f-stage"><option>Customer</option><option>Lead</option></select></div>
         </div>
+      </div>
+    </main>
+
+    <main class="content" id="view-roles" hidden>
+      <section class="dt">
+        <div class="dt-head">
+          <div class="dt-head-row">
+            <h2 class="t-table-title">Team roles</h2>
+            <div class="dt-actions">
+              <button type="button" class="btn btn-ghost btn-icon btn-sm" aria-label="Refresh"><svg><use href="#ic-refresh"/></svg></button>
+              <button type="button" class="btn btn-primary">New role</button>
+            </div>
+          </div>
+          <div class="dt-toolbar">
+            <div class="dt-search"><svg><use href="#ic-search"/></svg><input class="input" type="search" placeholder="Search roles" aria-label="Search roles"></div>
+          </div>
+        </div>
+        <div class="dt-scroll">
+          <table class="dt-table">
+            <thead><tr>
+              <th><span class="th-sort">Name<svg aria-hidden="true"><use href="#ic-chevrons-up-down"/></svg></span><span class="th-resize" aria-hidden="true"></span></th>
+              <th><span class="th-sort">Description<svg aria-hidden="true"><use href="#ic-chevrons-up-down"/></svg></span><span class="th-resize" aria-hidden="true"></span></th>
+              <th><span class="th-sort">Members<svg aria-hidden="true"><use href="#ic-chevrons-up-down"/></svg></span><span class="th-resize" aria-hidden="true"></span></th>
+              <th class="col-actions">Actions</th>
+            </tr></thead>
+            <tbody id="roles-rows"></tbody>
+          </table>
+        </div>
+        <div class="dt-foot">
+          <span class="num">Showing 1 to 12 of 12 results in 0.1s</span>
+          <nav class="pager" aria-label="Table pagination">
+            <button type="button" aria-label="First page" disabled><svg><use href="#ic-chevrons-left"/></svg></button>
+            <button type="button" aria-label="Previous page" disabled><svg><use href="#ic-chevron-left"/></svg></button>
+            <button type="button" aria-current="page">1</button>
+            <button type="button" aria-label="Next page" disabled><svg><use href="#ic-chevron-right"/></svg></button>
+            <button type="button" aria-label="Last page" disabled><svg><use href="#ic-chevrons-right"/></svg></button>
+          </nav>
+          <select class="select page-size" aria-label="Rows per page"><option>100 per page</option></select>
+        </div>
+      </section>
+    </main>
+
+    <main class="content" id="view-overview" hidden>
+      <div class="form-head">
+        <div>
+          <h1>Sales overview</h1>
+          <p class="muted">Pipeline health for the current quarter, with the accounts and deals that need attention this week.</p>
+        </div>
+        <div class="dt-actions"><button type="button" class="btn btn-outline">Last 30 days <svg><use href="#ic-chevron-down"/></svg></button></div>
+      </div>
+      <div class="overview-grid">
+        <section class="group">
+          <h3>Summary</h3>
+          <p>Twelve deals moved to negotiation this month, three more than in the previous one. Average deal size stayed flat, while the time from first contact to proposal dropped by four days. Two strategic accounts still have no follow-up scheduled.</p>
+          <p>Focus for this week: confirm next steps with the accounts listed below and close the remaining quotes before the end of the quarter.</p>
+        </section>
+        <section class="group">
+          <h3>Accounts without a follow-up</h3>
+          <table class="dt-table mini-table">
+            <thead><tr><th>Company</th><th>Owner</th><th>Last contact</th></tr></thead>
+            <tbody id="overview-accounts"></tbody>
+          </table>
+        </section>
+        <section class="group">
+          <h3>Deals closing this month</h3>
+          <table class="dt-table mini-table">
+            <thead><tr><th>Deal</th><th>Stage</th><th>Value</th><th>Close date</th></tr></thead>
+            <tbody id="overview-deals"></tbody>
+          </table>
+        </section>
+        <section class="group">
+          <h3>Notes</h3>
+          <p>Pricing for the solar retrofit bundle changes on the 1st. Quotes sent before that date keep the old price for 30 days.</p>
+        </section>
       </div>
     </main>
 
@@ -196,10 +272,13 @@
     <div class="toggle-row">
       <span>Screen</span>
       <select class="select" id="screen" aria-label="Screen">
-        <option value="list">People list</option>
+        <option value="list">People</option>
+        <option value="roles">Team roles</option>
         <option value="form">Person form</option>
+        <option value="overview">Sales overview</option>
       </select>
     </div>
+    <p class="proposal-hint">People: many columns. Team roles: few columns. Both are table-only views. Person form and Sales overview keep the 1536 px cap.</p>
     <div class="toggle-row"><label for="t-banner">Show an alert above the table</label><button type="button" class="switch" role="switch" id="t-banner" aria-checked="false"></button></div>
     <p class="proposal-hint">Edge case: when a message appears above the table, the table shrinks and the pagination stays visible.</p>
     <div class="toggle-row"><label for="t-demo">Demo mode</label><button type="button" class="switch" role="switch" id="t-demo" aria-checked="false"></button></div>
