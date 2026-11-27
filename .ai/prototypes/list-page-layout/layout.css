@@ -124,7 +124,10 @@
   position: absolute; right: 0; top: 0; z-index: 10; height: 100%; width: 0.75rem; transform: translateX(50%);
   display: flex; align-items: center; justify-content: center; cursor: col-resize;
 }
-.th-resize::before { content: ""; width: 0.125rem; height: 0.875rem; border-radius: 9999px; background: var(--border); }
+.th-resize::before { content: ""; width: 0.125rem; height: 0.875rem; border-radius: 9999px; background: var(--border); transition: height 150ms, background-color 150ms; }
+.th-resize { touch-action: none; }
+.th-resize:hover::before, .is-resizing .th-resize::before { height: 100%; background: var(--muted-foreground); }
+.is-resizing, .is-resizing * { cursor: col-resize !important; user-select: none; }
 .dt-table td { padding: 0.5rem 1rem; border-bottom: 1px solid var(--border); white-space: nowrap; vertical-align: middle; height: 3rem; }
 .dt-table tbody tr:last-child td { border-bottom: 0; }
 .dt-table tbody tr { cursor: pointer; }

@@ -284,7 +284,78 @@
     }
   })
 
-  pageSize.addEventListener('change', renderRows)
+  var MIN_COLUMN_WIDTH = 60
+  var columnWidths = new WeakMap()
+
+  function styleColumn(table, index, width) {
+    var value = width ? width + 'px' : ''
+    var inner = width ? Math.max(width - 32, 0) + 'px' : ''
+    Array.prototype.forEach.call(table.rows, function (row) {
+      var cell = row.cells[index]
+      if (!cell) return
+      cell.style.width = value
+      cell.style.minWidth = value
+      cell.style.maxWidth = value
+      var content = cell.querySelector('.cell, .th-sort')
+      if (content) {
+        content.style.maxWidth = inner
+        content.style.overflow = width ? 'hidden' : ''
+      }
+    })
+  }
+
+  function applyColumnWidths(table) {
+    var widths = columnWidths.get(table)
+    if (!widths) return
+    Object.keys(widths).forEach(function (index) { styleColumn(table, Number(index), widths[index]) })
+  }
+
+  document.addEventListener('pointerdown', function (event) {
+    var handle = event.target.closest('.th-resize')
+    if (!handle) return
+    event.preventDefault()
+    var headerCell = handle.closest('th')
+    var table = headerCell.closest('table')
+    var index = headerCell.cellIndex
+    var startX = event.clientX
+    var startWidth = headerCell.offsetWidth
+    var zoom = parseFloat(getComputedStyle(app).zoom) || 1
+    var widths = columnWidths.get(table) || {}
+    columnWidths.set(table, widths)
+    handle.setPointerCapture(event.pointerId)
+    document.body.classList.add('is-resizing')
+    function onMove(moveEvent) {
+      var width = Math.max(MIN_COLUMN_WIDTH, Math.round(startWidth + (moveEvent.clientX - startX) / zoom))
+      widths[index] = width
+      styleColumn(table, index, width)
+      updateShadows()
+    }
+    function onUp() {
+      handle.removeEventListener('pointermove', onMove)
+      handle.removeEventListener('pointerup', onUp)
+      handle.removeEventListener('pointercancel', onUp)
+      document.body.classList.remove('is-resizing')
+    }
+    handle.addEventListener('pointermove', onMove)
+    handle.addEventListener('pointerup', onUp)
+    handle.addEventListener('pointercancel', onUp)
+  })
+
+  document.addEventListener('dblclick', function (event) {
+    var handle = event.target.closest('.th-resize')
+    if (!handle) return
+    var headerCell = handle.closest('th')
+    var table = headerCell.closest('table')
+    var widths = columnWidths.get(table)
+    if (widths) delete widths[headerCell.cellIndex]
+    styleColumn(table, headerCell.cellIndex, 0)
+    updateShadows()
+  })
+
+  pageSize.addEventListener('change', function () {
+    renderRows()
+    applyColumnWidths(document.querySelector('#view-list .dt-table'))
+  })
   scroller.addEventListener('scroll', updateShadows, { passive: true })
   window.addEventListener('resize', function () { applySimulation(); updateWidthStat(); updateShadows() })
 

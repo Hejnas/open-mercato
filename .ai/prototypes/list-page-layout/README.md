@@ -55,6 +55,10 @@ This is a static HTML mockup, not implementation. It uses the app's own tokens: 
 
 Today the pinned Name column slides over the checkboxes when the table scrolls sideways. #8961 pins the selection column too, with Name next to it.
 
+## Column resizing
+
+The column dividers in the header work as in DataTable today: drag one to resize the column, double-click it to reset. In "after", resizing a column only changes the spare space before the frozen Actions column; the other columns keep their width.
+
 ## What does not change
 
 Colours, typography, toolbar, filters, row actions, the mobile layout and every page that does not opt in. "Before" was measured against the People list on upstream `main`; at the same window size the table card has the same position and width.
