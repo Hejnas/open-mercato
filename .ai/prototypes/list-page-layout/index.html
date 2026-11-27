@@ -314,6 +314,21 @@
     <strong>Layout proposal</strong>
     <button type="button" class="btn btn-ghost btn-xs" id="proposal-collapse" aria-expanded="true">Hide</button>
   </div>
+  <div class="proposal-top">
+    <div class="segmented" role="tablist" aria-label="Compare">
+      <button type="button" role="tab" data-mode="before" aria-selected="false">Before</button>
+      <button type="button" role="tab" data-mode="after" aria-selected="true">After</button>
+    </div>
+    <div class="toggle-row">
+      <span>Simulated screen</span>
+      <select class="select" id="sim-width" aria-label="Simulated screen width">
+        <option value="0">Your window</option>
+        <option value="1920">1920 px</option>
+        <option value="2560" selected>2560 px (4K)</option>
+        <option value="3840">3840 px</option>
+      </select>
+    </div>
+  </div>
   <div class="proposal-body">
     <p class="proposal-intro">Proposal for table-only list pages. Switch Before/After or each change; the simulated screen shows a wide monitor on any laptop.</p>
     <nav class="view-nav" aria-label="Mockup screens">
@@ -324,10 +339,6 @@
       <button type="button" data-view="form">Person form <span>keeps the 1536 px cap</span></button>
       <button type="button" data-view="overview">Sales overview <span>keeps the 1536 px cap</span></button>
     </nav>
-    <div class="segmented" role="tablist" aria-label="Compare">
-      <button type="button" role="tab" data-mode="before" aria-selected="false">Before</button>
-      <button type="button" role="tab" data-mode="after" aria-selected="true">After</button>
-    </div>
     <div class="toggle-row"><label for="t-width">1. Full width</label><button type="button" class="switch" role="switch" id="t-width" data-opt="opt-width" aria-checked="true"></button></div>
     <p class="proposal-hint">Table-only views use the whole screen; columns keep their natural width.</p>
     <div class="toggle-row"><label for="t-pager">2. Pinned pagination</label><button type="button" class="switch" role="switch" id="t-pager" data-opt="opt-pager" aria-checked="true"></button></div>
@@ -341,15 +352,6 @@
     <div class="toggle-row"><label for="t-frameless">6. Frameless table</label><button type="button" class="switch" role="switch" id="t-frameless" data-opt="opt-frameless" aria-checked="true"></button></div>
     <p class="proposal-hint">No card frame; the table sits on the page from the top bar to the footer.</p>
     <hr class="separator">
-    <div class="toggle-row">
-      <span>Simulated screen</span>
-      <select class="select" id="sim-width" aria-label="Simulated screen width">
-        <option value="0">Your window</option>
-        <option value="1920">1920 px</option>
-        <option value="2560" selected>2560 px (4K)</option>
-        <option value="3840">3840 px</option>
-      </select>
-    </div>
     <div class="toggle-row"><label for="t-banner">Show an alert at the top</label><button type="button" class="switch" role="switch" id="t-banner" aria-checked="false"></button></div>
     <p class="proposal-hint">Edge case: when a message appears above a table, the table shrinks and the pagination stays visible.</p>
     <div class="toggle-row"><label for="t-demo">Demo mode</label><button type="button" class="switch" role="switch" id="t-demo" aria-checked="false"></button></div>

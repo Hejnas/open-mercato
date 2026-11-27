@@ -325,7 +325,10 @@ body:not(.demo-mode) .chat-bubble { display: none; }
 .proposal-head { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); }
 .proposal-head strong { font-size: 0.75rem; }
 .proposal-body { padding: 0.5rem 0.75rem 0.75rem; display: flex; flex-direction: column; gap: 0.5rem; }
-.proposal.is-collapsed .proposal-body { display: none; }
+.proposal { display: flex; flex-direction: column; max-height: calc(100svh - 5rem); }
+.proposal-top { flex: none; display: flex; flex-direction: column; gap: 0.5rem; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); }
+.proposal-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+.proposal.is-collapsed .proposal-body, .proposal.is-collapsed .proposal-top { display: none; }
 .proposal.is-collapsed .proposal-head { border-bottom: 0; }
 .proposal .segmented { width: 100%; }
 .proposal .segmented > button { flex: 1; }
@@ -363,7 +366,7 @@ body:not(.demo-mode) .chat-bubble { display: none; }
   .is-simulated .app { flex: none; }
   .proposal {
     position: sticky; top: 0; left: auto; bottom: auto; flex: none;
-    width: 14rem; height: 100svh; overflow-y: auto;
+    width: 14rem; height: 100svh; max-height: none; overflow: hidden;
     border-width: 0 0 0 1px; border-radius: 0; box-shadow: none;
   }
   #proposal-collapse { display: none; }
