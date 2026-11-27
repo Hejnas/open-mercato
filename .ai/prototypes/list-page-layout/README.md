@@ -27,7 +27,9 @@ This is a static HTML mockup, not implementation. It uses the app's own tokens: 
 
 > As a user going through a long list, I want the pagination and the column headers to stay visible, so that I can change the page or check a column name without scrolling the whole page.
 
-- Today the whole page scrolls, so the column headers and the pagination scroll out of view.
+- Today, lists without `virtualized` (Team roles) scroll as a whole page, so the headers and the pagination scroll out of view.
+- People, Deals and Companies pass `virtualized`. Since #7702 (#7713) this keeps the header visible by capping the table at `calc(100vh - 300px)` with its own scroll. With a full page the table and the page then scroll at the same time: two scrollbars, and the fixed 300 px does not match pages with a summary or a message above the table. Open **Screens → People** in "Before" to see it.
+- This change builds on #7702: the header stays sticky, the pagination stays visible too, and the height comes from the page layout instead of a fixed offset, so only the table scrolls.
 - Acceptance:
   - On desktop (≥ 1024 px) the table fills the remaining height. Its body scrolls, while the headers and the pagination stay in place.
   - The mockup shows 100 rows per page by default, where the difference is most visible.

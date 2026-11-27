@@ -123,6 +123,8 @@
 .split-sep { width: 1px; align-self: stretch; margin-block: 0.375rem; background: var(--border); }
 
 .dt-scroll { isolation: isolate; overflow: auto; }
+/* main today: People, Deals and Companies pass `virtualized`, which caps the table at calc(100vh - 300px) (#7702, #7713) */
+.dt-scroll.is-virtualized { max-height: calc(var(--app-height, 100svh) - 300px); }
 .dt-table { min-width: 100%; border-collapse: collapse; font-size: 0.875rem; }
 .dt-table thead { position: sticky; top: 0; z-index: 30; background: var(--card); }
 .dt-table thead tr { background: color-mix(in oklab, var(--muted) 40%, transparent); }
@@ -284,7 +286,7 @@ body:not(.demo-mode) .chat-bubble { display: none; }
   .opt-pager .view-list .content { min-height: 0; }
   .opt-pager .view-list .dt { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
   .opt-pager .view-list .dt-head, .opt-pager .view-list .dt-foot { flex: none; }
-  .opt-pager .view-list .dt-scroll { flex: 1 1 auto; min-height: 0; }
+  .opt-pager .view-list .dt-scroll { flex: 1 1 auto; min-height: 0; max-height: none; }
 }
 
 /* ── Multi-section view (stays capped in every mode) ──────────── */
