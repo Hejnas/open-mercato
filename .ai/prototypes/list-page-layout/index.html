@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="components.css">
 <link rel="stylesheet" href="layout.css">
 </head>
-<body class="opt-width opt-pager opt-shadows opt-footer opt-select">
+<body class="opt-width opt-pager opt-shadows opt-footer opt-select opt-frameless">
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
 <symbol id="ic-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></symbol>
@@ -251,15 +251,23 @@
     <button type="button" class="btn btn-ghost btn-xs" id="proposal-collapse" aria-expanded="true">Hide</button>
   </div>
   <div class="proposal-body">
+    <p class="proposal-intro">Proposal for table-only list pages. Switch Before/After or each change; the simulated screen shows a wide monitor on any laptop.</p>
     <div class="segmented" role="tablist" aria-label="Compare">
       <button type="button" role="tab" data-mode="before" aria-selected="false">Before</button>
       <button type="button" role="tab" data-mode="after" aria-selected="true">After</button>
     </div>
     <div class="toggle-row"><label for="t-width">1. Full width</label><button type="button" class="switch" role="switch" id="t-width" data-opt="opt-width" aria-checked="true"></button></div>
+    <p class="proposal-hint">Table-only views use the whole screen; columns keep their natural width.</p>
     <div class="toggle-row"><label for="t-pager">2. Pinned pagination</label><button type="button" class="switch" role="switch" id="t-pager" data-opt="opt-pager" aria-checked="true"></button></div>
+    <p class="proposal-hint">Scroll the table: headers and pagination stay put.</p>
     <div class="toggle-row"><label for="t-shadows">3. Shadows on overflow</label><button type="button" class="switch" role="switch" id="t-shadows" data-opt="opt-shadows" aria-checked="true"></button></div>
+    <p class="proposal-hint">Scroll sideways: a shadow shows only over hidden columns.</p>
     <div class="toggle-row"><label for="t-footer">4. Compact footer <span class="pr-ref">#9227</span></label><button type="button" class="switch" role="switch" id="t-footer" data-opt="opt-footer" aria-checked="true"></button></div>
+    <p class="proposal-hint">A lower footer; with Demo mode on, a smaller reserve for the contact button.</p>
     <div class="toggle-row"><label for="t-select">5. Pinned checkboxes <span class="pr-ref">#8961</span></label><button type="button" class="switch" role="switch" id="t-select" data-opt="opt-select" aria-checked="true"></button></div>
+    <p class="proposal-hint">Scroll sideways: checkboxes stay next to Name.</p>
+    <div class="toggle-row"><label for="t-frameless">6. Frameless table</label><button type="button" class="switch" role="switch" id="t-frameless" data-opt="opt-frameless" aria-checked="true"></button></div>
+    <p class="proposal-hint">No card frame; the table sits on the page from the top bar to the footer.</p>
     <hr class="separator">
     <div class="toggle-row">
       <span>Simulated screen</span>

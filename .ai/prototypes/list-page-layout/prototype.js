@@ -3,7 +3,7 @@
 
   var CONTENT_CAP = 1536
   var TOTAL = 312
-  var OPTIONS = ['opt-width', 'opt-pager', 'opt-shadows', 'opt-footer', 'opt-select']
+  var OPTIONS = ['opt-width', 'opt-pager', 'opt-shadows', 'opt-footer', 'opt-select', 'opt-frameless']
   var simWidth = 2560
 
   var COLUMNS = ['Name', 'Email', 'Status', 'Lifecycle stage', 'Next interaction', 'Created', 'Source', 'Owner', 'Job title', 'Department', 'Seniority', 'Timezone']

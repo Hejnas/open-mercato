@@ -208,6 +208,19 @@ body:not(.demo-mode) .chat-bubble { display: none; }
 .opt-footer .app-foot { padding: 0.25rem 1rem; }
 .demo-mode.opt-footer .content { padding-bottom: 3.25rem; }
 
+/* ── After: frameless table (DataTable `embedded` look), no top/bottom page padding ── */
+.opt-frameless .view-list .content { padding-top: 0; padding-bottom: 0; }
+.demo-mode.opt-frameless .view-list .content { padding-bottom: 5rem; }
+.demo-mode.opt-footer.opt-frameless .view-list .content { padding-bottom: 3.25rem; }
+.opt-frameless .view-list .dt { border: 0; border-radius: 0; background: var(--background); margin-inline: 0; }
+.opt-frameless .view-list .dt-head { padding: 0.75rem 0; border-bottom: 0; }
+.opt-frameless .view-list .dt-toolbar { margin-top: 0.5rem; padding-top: 0; border-top: 0; }
+.opt-frameless .view-list .dt-table thead,
+.opt-frameless .view-list .dt-table .pin-left,
+.opt-frameless .view-list .dt-table .pin-right,
+.opt-frameless.opt-select .view-list .dt-table .col-select { background-color: var(--background); }
+.opt-frameless .view-list .dt-foot { padding-inline: 0; }
+
 /* ── After: full width for table-only views ───────────────────── */
 .opt-width .view-list .content { max-width: none; margin-inline: 0; }
 /* Columns keep their natural width; the spare width collects before the frozen Actions column */
@@ -274,6 +287,7 @@ body:not(.demo-mode) .chat-bubble { display: none; }
 .proposal-stat b { color: var(--foreground); }
 .proposal-link { color: var(--muted-foreground); }
 .proposal-hint { margin: -0.25rem 0 0; color: var(--muted-foreground); line-height: 1.4; }
+.proposal-intro { margin: 0; line-height: 1.4; }
 .pr-ref { color: var(--muted-foreground); }
 
 /* ── Simulated screen width: the app renders at a wide width, zoomed to fit the window ── */
