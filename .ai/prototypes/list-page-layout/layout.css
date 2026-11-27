@@ -208,6 +208,35 @@ body:not(.demo-mode) .chat-bubble { display: none; }
 .opt-footer .app-foot { padding: 0.25rem 1rem; }
 .demo-mode.opt-footer .content { padding-bottom: 3.25rem; }
 
+/* ── Deals: view tabs, KPI strip and richer cells ─────────────── */
+.view-tabs { flex: none; display: flex; align-items: flex-end; gap: 0.25rem; border-bottom: 1px solid var(--border); }
+.view-tabs button {
+  border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px; background: transparent; cursor: pointer;
+  padding: 0.625rem 0.875rem; font-size: 0.875rem; color: var(--muted-foreground);
+}
+.view-tabs button[aria-current="page"] { border-bottom-color: var(--accent-indigo); font-weight: 600; color: var(--foreground); }
+.kpi-strip { flex: none; margin-inline: 0.5rem; display: flex; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--card); overflow: hidden; }
+.kpi-grid { flex: 1; min-width: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; background: var(--border); }
+@media (min-width: 1280px) { .kpi-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.kpi { background: var(--card); padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; }
+.kpi-label { font-size: 0.75rem; color: var(--muted-foreground); }
+.kpi-value { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.5rem; font-size: 1.5rem; line-height: 2rem; }
+.kpi-value small { font-size: 0.75rem; color: var(--muted-foreground); }
+.kpi-range { flex: none; display: flex; align-items: center; padding: 0 1rem; border-left: 1px solid var(--border); }
+.cell-title { display: flex; align-items: center; gap: 0.5rem; max-width: 20rem; }
+.title-icon {
+  width: 1.75rem; height: 1.75rem; flex: none; border-radius: var(--radius-md); background: var(--muted);
+  display: inline-flex; align-items: center; justify-content: center; color: var(--muted-foreground);
+}
+.title-icon svg { width: 1rem; height: 1rem; }
+.cell-two { display: flex; flex-direction: column; line-height: 1.25; }
+.cell-two small { font-size: 0.75rem; color: var(--muted-foreground); }
+.dt-table .badge { font-weight: 600; }
+.initials { display: inline-flex; gap: 0.25rem; }
+.initials span { font-size: 0.75rem; font-weight: 600; color: var(--accent-indigo); }
+.opt-frameless .view-list .view-tabs { margin-bottom: 0.75rem; }
+.opt-frameless .view-list .kpi-strip { margin-inline: 0; }
+
 /* ── After: frameless table (DataTable `embedded` look), no top/bottom page padding ── */
 .opt-frameless .view-list .content { padding-top: 0; padding-bottom: 0; gap: 0; }
 .opt-frameless .view-list .content > .alert { margin-top: 0.75rem; }

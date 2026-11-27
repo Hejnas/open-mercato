@@ -18,7 +18,7 @@ This is a static HTML mockup, not implementation. It uses the app's own tokens: 
 - Unused width of the content area: about **9%** at 1920 px, **34%** at 2560 px (4K at 150%), **57%** at 3840 px (4K at 100%). Below ~1780 px the cap is not visible.
 - Acceptance:
   - A page opts in explicitly, e.g. `contentWidth: 'full'` in its page metadata. The default stays exactly as today, so pages and third-party modules that do not opt in are unchanged.
-  - Opt in only where the table is the only element of the view (People, Companies, …).
+  - Opt in only where the table is the only element of the view (People, Companies, …). A list with a summary above it, such as Deals with its KPI strip and view tabs, counts as a table-only view: the summary describes the same table. Check **Screen → Deals**.
   - The table card and its header bar always span the full width, as in ClickUp, Asana or Jira. Columns keep their natural width instead of being stretched; the spare space sits between the last data column and the frozen Actions column at the right edge. Check **Screen → Team roles**.
   - Forms, detail pages and views with several sections keep the 1536 px cap. Check **Screen → Person form** and **Screen → Sales overview**.
 - Proposed rule in `.ai/ds-rules.md`: keep "Constrain max content width → `max-w-screen-2xl mx-auto`" and add "Exception: a view whose only element is a DataTable uses the full content width." Issue #8640 asks for the same.

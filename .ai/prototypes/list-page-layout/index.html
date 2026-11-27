@@ -49,7 +49,7 @@
       <button type="button" class="nav-item"><svg><use href="#ic-building"/></svg><span class="label">Companies</span></button>
       <button type="button" class="nav-item"><svg><use href="#ic-calendar"/></svg><span class="label">Calendar</span></button>
       <button type="button" class="nav-item active" data-view="list" aria-current="page"><svg><use href="#ic-users"/></svg><span class="label">People</span></button>
-      <button type="button" class="nav-item"><svg><use href="#ic-briefcase"/></svg><span class="label">Deals</span></button>
+      <button type="button" class="nav-item" data-view="deals"><svg><use href="#ic-briefcase"/></svg><span class="label">Deals</span></button>
     </div>
     <div class="nav-group"><span class="label">Settings</span><svg><use href="#ic-chevron-down"/></svg></div>
     <div class="nav-items">
@@ -162,6 +162,69 @@
           <div class="field"><label for="f-stage">Lifecycle stage</label><select class="select" id="f-stage"><option>Customer</option><option>Lead</option></select></div>
         </div>
       </div>
+    </main>
+
+    <main class="content" id="view-deals" hidden>
+      <nav class="view-tabs" aria-label="Deal views">
+        <button type="button">Kanban</button>
+        <button type="button" aria-current="page">List</button>
+        <button type="button">Map</button>
+      </nav>
+      <section class="kpi-strip" aria-label="Pipeline summary">
+        <div class="kpi-grid">
+          <div class="kpi"><span class="kpi-label">Pipeline value</span><span class="kpi-value">622k <small>USD</small> <small>--</small></span></div>
+          <div class="kpi"><span class="kpi-label">Active deals</span><span class="kpi-value">4 <small>--</small></span></div>
+          <div class="kpi"><span class="kpi-label">Won</span><span class="kpi-value">96k <small>USD</small> <small>--</small></span></div>
+          <div class="kpi"><span class="kpi-label">Win rate</span><span class="kpi-value">50 <small>%</small> <span class="badge badge-success">↑ 50pp</span></span></div>
+        </div>
+        <div class="kpi-range">
+          <div class="segmented" role="tablist" aria-label="Range">
+            <button type="button" role="tab" aria-selected="false">3M</button>
+            <button type="button" role="tab" aria-selected="true">6M</button>
+            <button type="button" role="tab" aria-selected="false">12M</button>
+          </div>
+        </div>
+      </section>
+      <section class="dt">
+        <div class="dt-head">
+          <div class="dt-head-row">
+            <h2 class="t-table-title">Deals</h2>
+            <div class="dt-actions">
+              <button type="button" class="btn btn-ghost btn-icon btn-sm" aria-label="Refresh"><svg><use href="#ic-refresh"/></svg></button>
+              <button type="button" class="btn btn-ghost btn-icon btn-sm" aria-label="Customize columns"><svg><use href="#ic-more"/></svg></button>
+              <button type="button" class="btn btn-outline">Export</button>
+              <button type="button" class="btn btn-primary">New deal</button>
+            </div>
+          </div>
+          <div class="dt-toolbar">
+            <div class="dt-search"><svg><use href="#ic-search"/></svg><input class="input" type="search" placeholder="Search deals" aria-label="Search deals"></div>
+            <button type="button" class="btn btn-outline"><svg><use href="#ic-sparkles"/></svg> AI</button>
+            <div class="dt-toolbar-right">
+              <button type="button" class="btn btn-outline"><svg><use href="#ic-filter"/></svg> Filters</button>
+              <button type="button" class="btn btn-outline split"><svg><use href="#ic-sliders"/></svg> Perspectives <span class="split-sep"></span><span class="muted">All views</span> <svg><use href="#ic-chevron-down"/></svg></button>
+            </div>
+          </div>
+        </div>
+        <div class="dt-scroll">
+          <table class="dt-table">
+            <thead><tr id="deals-head"></tr></thead>
+            <tbody id="deals-rows"></tbody>
+          </table>
+        </div>
+        <div class="dt-foot">
+          <span class="num">Showing 1 to 100 of 248 results in 0.6s</span>
+          <nav class="pager" aria-label="Table pagination">
+            <button type="button" aria-label="First page" disabled><svg><use href="#ic-chevrons-left"/></svg></button>
+            <button type="button" aria-label="Previous page" disabled><svg><use href="#ic-chevron-left"/></svg></button>
+            <button type="button" aria-current="page">1</button>
+            <button type="button">2</button>
+            <button type="button">3</button>
+            <button type="button" aria-label="Next page"><svg><use href="#ic-chevron-right"/></svg></button>
+            <button type="button" aria-label="Last page"><svg><use href="#ic-chevrons-right"/></svg></button>
+          </nav>
+          <select class="select page-size" aria-label="Rows per page"><option>100 per page</option></select>
+        </div>
+      </section>
     </main>
 
     <main class="content" id="view-roles" hidden>
@@ -282,12 +345,13 @@
       <span>Screen</span>
       <select class="select" id="screen" aria-label="Screen">
         <option value="list">People</option>
+        <option value="deals">Deals</option>
         <option value="roles">Team roles</option>
         <option value="form">Person form</option>
         <option value="overview">Sales overview</option>
       </select>
     </div>
-    <p class="proposal-hint">People: many columns. Team roles: few columns. Both are table-only views. Person form and Sales overview keep the 1536 px cap.</p>
+    <p class="proposal-hint">People: many columns. Deals: summary above the table. Team roles: few columns. These are table-only views. Person form and Sales overview keep the 1536 px cap.</p>
     <div class="toggle-row"><label for="t-banner">Show an alert above the table</label><button type="button" class="switch" role="switch" id="t-banner" aria-checked="false"></button></div>
     <p class="proposal-hint">Edge case: when a message appears above the table, the table shrinks and the pagination stays visible.</p>
     <div class="toggle-row"><label for="t-demo">Demo mode</label><button type="button" class="switch" role="switch" id="t-demo" aria-checked="false"></button></div>

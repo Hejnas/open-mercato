@@ -66,7 +66,6 @@
   var rowsBody = document.getElementById('rows')
   var pageSize = document.getElementById('page-size')
   var resultCount = document.getElementById('result-count')
-  var scroller = document.getElementById('dt-scroll')
   var widthStat = document.getElementById('width-stat')
   var app = document.getElementById('app')
 
@@ -81,10 +80,14 @@
     updateShadows()
   }
 
+  function updateScrollerShadows(element) {
+    var maxScroll = element.scrollWidth - element.clientWidth
+    element.classList.toggle('is-scrolled', element.scrollLeft > 0)
+    element.classList.toggle('has-more', maxScroll - element.scrollLeft > 1)
+  }
+
   function updateShadows() {
-    var maxScroll = scroller.scrollWidth - scroller.clientWidth
-    scroller.classList.toggle('is-scrolled', scroller.scrollLeft > 0)
-    scroller.classList.toggle('has-more', maxScroll - scroller.scrollLeft > 1)
+    document.querySelectorAll('.dt-scroll').forEach(updateScrollerShadows)
   }
 
   function availableWidth() {
@@ -156,6 +159,7 @@
 
   var VIEWS = {
     list: { main: 'view-list', crumb: 'People', tableOnly: true, nav: 'list' },
+    deals: { main: 'view-deals', crumb: 'Deals', tableOnly: true, nav: 'deals' },
     roles: { main: 'view-roles', crumb: 'Team roles', tableOnly: true, nav: 'roles' },
     form: { main: 'view-form', crumb: 'Mia Johnson', tableOnly: false, nav: 'list' },
     overview: { main: 'view-overview', crumb: 'Sales overview', tableOnly: false, nav: 'overview' },
@@ -177,6 +181,48 @@
     document.getElementById('screen').value = view
     window.scrollTo(0, 0)
     refresh()
+  }
+
+  function buildDeals() {
+    var columns = ['Title', 'Status', 'Pipeline stage', 'Pipeline', 'Value', 'Probability', 'Expected close', 'Owner', 'Companies', 'People', 'Updated', 'Competitive risk', 'Seats']
+    var head = '<th class="col-select"><button type="button" class="check" role="checkbox" aria-checked="false" aria-label="Select all"><svg><use href="#ic-check"/></svg></button></th>'
+    columns.forEach(function (label, index) {
+      head += '<th' + (index === 0 ? ' class="pin-left"' : '') + '><span class="th-sort">' + label +
+        '<svg aria-hidden="true"><use href="#ic-chevrons-up-down"/></svg></span><span class="th-resize" aria-hidden="true"></span></th>'
+    })
+    head += '<th class="col-filler" aria-hidden="true"></th><th class="col-actions pin-right">Actions</th>'
+    document.getElementById('deals-head').innerHTML = head
+    var titles = ['Cedar Creek Retreat Expansion', 'Sunset Lofts Battery Upgrade', 'Wanderstay Boutique Renovation', 'Blue Harbor Grocers Pilot Program', 'Redwood Residences Solar Rollout', 'Midwest Outfitters Expansion', 'Northwind Fleet Charging', 'Harborview Analytics Renewal', 'Copperleaf Studio Fit-out', 'Brightside Warehouse Retrofit']
+    var statuses = [['Lost', 'badge-error'], ['Open', 'badge-info'], ['In progress', 'badge-warning'], ['Won', 'badge-success'], ['In progress', 'badge-warning'], ['Open', 'badge-info']]
+    var stages = ['Lost', 'Offering', 'Sales qualified lead', 'Won', 'Negotiations', 'Opportunity']
+    var probabilities = ['0%', '40%', '65%', '100%', '55%', '35%']
+    var closes = [['8/27/2026', 'Lost'], ['1/9/2027', 'next month'], ['12/10/2026', 'in 2 weeks'], ['10/11/2026', 'Won'], ['12/20/2026', 'in 3 weeks'], ['3/5/2027', 'in 3 months']]
+    var companies = ['Copperleaf Design Co.', 'Brightside Solar', 'Harborview Analytics', 'Northwind Traders']
+    var people = ['TB', 'MJ DC', 'AP', 'LO NH', 'TB MJ']
+    var risks = ['high', 'medium', 'low']
+    var html = ''
+    for (var index = 0; index < 100; index += 1) {
+      var status = pick(statuses, index)
+      var close = pick(closes, index)
+      html += '<tr>' +
+        '<td class="col-select"><button type="button" class="check" role="checkbox" aria-checked="false" aria-label="Select deal"><svg><use href="#ic-check"/></svg></button></td>' +
+        '<td class="pin-left"><div class="cell cell-title"><span class="title-icon"><svg><use href="#ic-briefcase"/></svg></span><a class="cell-name" href="#">' + pick(titles, index) + (index >= titles.length ? ' ' + (Math.floor(index / titles.length) + 1) : '') + '</a></div></td>' +
+        cell('<span class="badge ' + status[1] + '"><span class="dot"></span>' + status[0] + '</span>') +
+        cell(pick(stages, index)) +
+        cell('Default Pipeline') +
+        cell('<span class="cell-two"><span>' + (80 + (index * 37) % 140) + ',000</span><small>USD</small></span>') +
+        cell(pick(probabilities, index)) +
+        cell('<span class="cell-two"><span>' + close[0] + '</span><small>' + close[1] + '</small></span>') +
+        cell(none()) +
+        cell('<span class="pill">' + pick(companies, index) + '</span>') +
+        cell('<span class="initials">' + pick(people, index).split(' ').map(function (name) { return '<span>' + name + '</span>' }).join('') + '</span>') +
+        cell(formatDate(-(index % 5))) +
+        cell(pick(risks, index)) +
+        cell(String(4 + (index * 3) % 20)) +
+        '<td class="col-filler" aria-hidden="true"></td><td class="col-actions pin-right"><button type="button" class="btn btn-ghost btn-icon btn-sm" aria-label="Row actions"><svg><use href="#ic-more"/></svg></button></td>' +
+        '</tr>'
+    }
+    document.getElementById('deals-rows').innerHTML = html
   }
 
   function buildStaticTables() {
@@ -356,11 +402,14 @@
     renderRows()
     applyColumnWidths(document.querySelector('#view-list .dt-table'))
   })
-  scroller.addEventListener('scroll', updateShadows, { passive: true })
+  document.addEventListener('scroll', function (event) {
+    if (event.target.classList && event.target.classList.contains('dt-scroll')) updateScrollerShadows(event.target)
+  }, { capture: true, passive: true })
   window.addEventListener('resize', function () { applySimulation(); updateWidthStat(); updateShadows() })
 
   buildHead()
   buildStaticTables()
+  buildDeals()
   applySimulation()
   readHash()
   renderRows()
