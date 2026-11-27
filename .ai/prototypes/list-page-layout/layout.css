@@ -375,9 +375,9 @@ body:not(.demo-mode) .chat-bubble { display: none; }
 
 /* Desktop: the proposal panel is its own column on the right, so it never covers the mockup */
 @media (min-width: 1024px) {
-  body { display: flex; align-items: flex-start; }
-  .app { flex: 1 1 auto; min-width: 0; }
-  .is-simulated .app { flex: none; }
+  body { display: flex; height: 100svh; overflow: hidden; }
+  /* The mockup scrolls inside its own area, so its scrollbar never sits on top of the panel's */
+  .stage { flex: 1 1 auto; min-width: 0; height: 100svh; overflow-x: hidden; overflow-y: scroll; }
   .proposal {
     position: sticky; top: 0; left: auto; bottom: auto; flex: none;
     width: 14rem; height: 100svh; max-height: none; overflow: hidden;

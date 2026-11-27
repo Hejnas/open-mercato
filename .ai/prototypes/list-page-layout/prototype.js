@@ -106,8 +106,8 @@
   }
 
   function availableWidth() {
-    var panel = window.innerWidth >= 1024 ? document.getElementById('proposal').offsetWidth : 0
-    return window.innerWidth - panel
+    if (window.innerWidth >= 1024) return document.getElementById('stage').clientWidth
+    return window.innerWidth
   }
 
   function applySimulation() {
@@ -117,7 +117,8 @@
     document.body.classList.toggle('is-simulated', simulated)
     document.documentElement.style.setProperty('--sim-width', String(simWidth))
     document.documentElement.style.setProperty('--sim-zoom', String(zoom))
-    document.documentElement.style.setProperty('--app-height', simulated ? (window.innerHeight / zoom) + 'px' : '100svh')
+    var height = window.innerWidth >= 1024 ? document.getElementById('stage').clientHeight : window.innerHeight
+    document.documentElement.style.setProperty('--app-height', simulated ? (height / zoom) + 'px' : '100svh')
   }
 
   function effectiveWidth() {
@@ -256,6 +257,7 @@
     placeBanner()
     document.getElementById('crumb-here').textContent = config.crumb
     window.scrollTo(0, 0)
+    document.getElementById('stage').scrollTop = 0
     refresh()
   }
 
