@@ -395,6 +395,14 @@
     }
   })
 
+  var panelBody = document.querySelector('.proposal-body')
+  var panelFade = document.getElementById('proposal-fade')
+  function updatePanelFade() {
+    panelFade.hidden = panelBody.scrollHeight - panelBody.clientHeight - panelBody.scrollTop <= 1
+  }
+  panelBody.addEventListener('scroll', updatePanelFade, { passive: true })
+  window.addEventListener('resize', updatePanelFade)
+
   var collapseButton = document.getElementById('proposal-collapse')
   function setCollapsed(collapsed) {
     document.getElementById('proposal').classList.toggle('is-collapsed', collapsed)
@@ -501,4 +509,5 @@
   applySimulation()
   renderRows()
   setScreen(initialView)
+  updatePanelFade()
 })()

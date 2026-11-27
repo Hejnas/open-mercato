@@ -327,7 +327,21 @@ body:not(.demo-mode) .chat-bubble { display: none; }
 .proposal-body { padding: 0.5rem 0.75rem 0.75rem; display: flex; flex-direction: column; gap: 0.5rem; }
 .proposal { display: flex; flex-direction: column; max-height: calc(100svh - 5rem); }
 .proposal-top { flex: none; display: flex; flex-direction: column; gap: 0.5rem; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); }
-.proposal-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+.proposal-body {
+  flex: 1 1 auto; min-height: 0; overflow-y: scroll;
+  scrollbar-width: auto; scrollbar-color: color-mix(in oklch, var(--muted-foreground) 60%, transparent) var(--muted);
+}
+.proposal-body::-webkit-scrollbar { width: 12px; }
+.proposal-body::-webkit-scrollbar-track { background: var(--muted); }
+.proposal-body::-webkit-scrollbar-thumb {
+  background-color: color-mix(in oklch, var(--muted-foreground) 60%, transparent);
+  border-radius: 9999px; border: 3px solid var(--muted); background-clip: padding-box;
+}
+.proposal-fade {
+  position: absolute; left: 0; right: 12px; bottom: 0; height: 3rem; pointer-events: none;
+  background: linear-gradient(to bottom, transparent, var(--popover));
+}
+.proposal.is-collapsed .proposal-fade { display: none; }
 .proposal.is-collapsed .proposal-body, .proposal.is-collapsed .proposal-top { display: none; }
 .proposal.is-collapsed .proposal-head { border-bottom: 0; }
 .proposal .segmented { width: 100%; }
