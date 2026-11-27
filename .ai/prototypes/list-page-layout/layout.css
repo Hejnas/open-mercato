@@ -1,14 +1,16 @@
 /* Backend shell and DataTable for the list-page layout proposal.
-   "Before" mirrors upstream main:
-     AppShell.tsx  main  flex-1 p-4 lg:p-6 mx-auto w-full max-w-screen-2xl
-     DataTable.tsx table wrapper  isolate overflow-auto (no height → page scrolls)
+   "Before" mirrors upstream main (measured on /backend/customers/people):
+     AppShell.tsx  main  flex-1 p-4 lg:p-6 mx-auto w-full max-w-screen-2xl (+ bottom reserve)
+     DataTable.tsx table wrapper  isolate overflow-auto (no height → the page scrolls)
+     DataTable.tsx stickyFirstColumn pins the first data column at left-0
      DataTable.tsx STICKY_LEFT/RIGHT_SHADOW_CLASS (shadows always painted)
    "After" is driven by three body classes: .opt-width, .opt-pager, .opt-shadows. */
 
 [hidden] { display: none !important; }
 
 /* ── Shell ─────────────────────────────────────────────────────── */
-.app { display: grid; grid-template-columns: 240px minmax(0, 1fr); min-height: 100svh; }
+.app { --sidebar-width: 240px; display: grid; grid-template-columns: var(--sidebar-width) minmax(0, 1fr); min-height: 100svh; }
+.app.sidebar-collapsed { --sidebar-width: 80px; }
 
 .sidebar {
   position: sticky; top: 0; height: 100svh; overflow-y: auto;
@@ -20,7 +22,7 @@
 .sidebar-brand { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; border-radius: var(--radius-xl); font-size: 0.875rem; font-weight: 500; }
 .brand-mark {
   width: 2.5rem; height: 2.5rem; flex: none; border-radius: 9999px;
-  background: var(--foreground); color: var(--background);
+  background: var(--brand-lime); color: var(--foreground);
   display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700;
 }
 .sidebar-search {
@@ -49,6 +51,13 @@
   width: 0.25rem; height: 1.25rem; border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
   background: var(--foreground);
 }
+.sidebar-collapsed .sidebar { padding-inline: 0.5rem; align-items: center; }
+.sidebar-collapsed .sidebar .label,
+.sidebar-collapsed .sidebar .nav-group svg,
+.sidebar-collapsed .sidebar-search { display: none; }
+.sidebar-collapsed .sidebar-brand { padding: 0.25rem; }
+.sidebar-collapsed .nav-group { height: 1px; padding: 0; background: var(--border); width: 100%; }
+.sidebar-collapsed .nav-item { justify-content: center; width: 2.5rem; padding: 0.625rem; }
 
 .main { display: flex; flex-direction: column; min-width: 0; }
 .topbar {
@@ -57,10 +66,12 @@
   padding: 0 1.5rem; border-bottom: 1px solid var(--border);
   background: color-mix(in oklab, var(--background) 95%, transparent); backdrop-filter: blur(8px);
 }
+.topbar-left { display: flex; align-items: center; gap: 0.75rem; min-width: 0; }
 .crumbs { display: flex; align-items: center; gap: 0.375rem; font-size: 0.875rem; color: var(--muted-foreground); min-width: 0; }
 .crumbs svg { width: 1rem; height: 1rem; flex: none; }
 .crumbs .here { color: var(--foreground); }
 .topbar-right { display: flex; align-items: center; gap: 0.5rem; color: var(--muted-foreground); }
+.topbar-right .btn-ghost { color: var(--foreground); }
 .icon-btn {
   width: 2rem; height: 2rem; display: inline-flex; align-items: center; justify-content: center;
   border: 0; background: transparent; border-radius: var(--radius-md); color: var(--muted-foreground); cursor: pointer;
@@ -70,78 +81,117 @@
 
 .content {
   flex: 1; width: 100%; max-width: 1536px; margin-inline: auto;
-  padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; min-width: 0;
+  padding: 1.5rem 1.5rem 5rem; display: flex; flex-direction: column; gap: 1rem; min-width: 0;
 }
 .app-foot {
-  display: flex; align-items: center; justify-content: flex-end; gap: 1rem;
-  padding: 0.75rem 1rem; border-top: 1px solid var(--border);
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 1rem;
+  padding: 0.75rem 1rem 5rem; border-top: 1px solid var(--border);
+  background: color-mix(in oklab, var(--background) 80%, transparent);
   font-size: 0.75rem; color: var(--muted-foreground);
 }
+.chat-bubble {
+  position: fixed; right: 1rem; bottom: 1rem; z-index: 50;
+  width: 2.5rem; height: 2.5rem; border-radius: 9999px; border: 0; cursor: pointer;
+  background: var(--brand-lime); color: var(--foreground); box-shadow: var(--shadow-md);
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.chat-bubble svg { width: 1.125rem; height: 1.125rem; }
 
 /* ── DataTable ─────────────────────────────────────────────────── */
 .dt { border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--card); margin-inline: 0.5rem; min-width: 0; }
 .dt-head { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); }
-.dt-head-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem; }
+.dt-head-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem; min-height: 2.25rem; }
 .dt-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
 .dt-toolbar { margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--border); display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+.dt-toolbar-right { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-left: auto; }
 .dt-search { position: relative; width: 20rem; max-width: 100%; }
 .dt-search svg { position: absolute; left: 0.75rem; top: 50%; width: 1rem; height: 1rem; transform: translateY(-50%); color: var(--muted-foreground); }
 .dt-search .input { padding-left: 2.25rem; }
-.dt-toolbar .btn-outline { margin-left: auto; }
+.split { gap: 0.5rem; }
+.split-sep { width: 1px; align-self: stretch; margin-block: 0.375rem; background: var(--border); }
 
 .dt-scroll { isolation: isolate; overflow: auto; }
 .dt-table { min-width: 100%; border-collapse: collapse; font-size: 0.875rem; }
 .dt-table thead { position: sticky; top: 0; z-index: 30; background: var(--card); }
 .dt-table thead tr { background: color-mix(in oklab, var(--muted) 40%, transparent); }
 .dt-table th {
-  text-align: left; font-weight: 500; color: var(--muted-foreground);
+  position: relative; text-align: left; font-weight: 500; color: var(--muted-foreground);
   padding: 0.5rem 1rem; border-bottom: 1px solid var(--border); white-space: nowrap;
 }
-.dt-table td { padding: 0.5rem 1rem; border-bottom: 1px solid var(--border); white-space: nowrap; vertical-align: middle; }
+.th-sort { display: inline-flex; align-items: center; gap: 0.25rem; }
+.th-sort svg { width: 0.875rem; height: 0.875rem; color: color-mix(in oklab, var(--muted-foreground) 50%, transparent); }
+.th-resize {
+  position: absolute; right: 0; top: 0; z-index: 10; height: 100%; width: 0.75rem; transform: translateX(50%);
+  display: flex; align-items: center; justify-content: center; cursor: col-resize;
+}
+.th-resize::before { content: ""; width: 0.125rem; height: 0.875rem; border-radius: 9999px; background: var(--border); }
+.dt-table td { padding: 0.5rem 1rem; border-bottom: 1px solid var(--border); white-space: nowrap; vertical-align: middle; height: 3rem; }
 .dt-table tbody tr:last-child td { border-bottom: 0; }
+.dt-table tbody tr { cursor: pointer; }
 .dt-table tbody tr:hover { background: color-mix(in oklab, var(--muted) 30%, transparent); }
-.dt-table .col-select { width: 3rem; padding-right: 0; }
+.dt-table .col-select { width: 2rem; }
 .dt-table .col-actions { width: 0; text-align: right; }
-.cell-name { display: flex; align-items: center; gap: 0.5rem; font-weight: 500; }
+.cell { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 14rem; }
+.cell-name { font-weight: 500; color: var(--foreground); text-decoration: none; }
+.cell-name:hover { text-decoration: underline; }
+.empty-value { color: var(--muted-foreground); }
 
-/* Pinned columns (md and up, as in DataTable.tsx) */
+/* Badge primitive: outline with a colored dot (status) and secondary (dictionary values) */
+.pill {
+  display: inline-flex; align-items: center; gap: 0.125rem; height: 1.25rem; padding: 0 0.5rem;
+  border-radius: 9999px; border: 1px solid var(--border); color: var(--foreground);
+  font-size: 0.75rem; line-height: 1rem; font-weight: 500;
+}
+.pill .dot { width: 0.5rem; height: 0.5rem; border-radius: 9999px; margin-right: 0.125rem; }
+.pill-secondary { border-color: transparent; background: var(--secondary); color: var(--secondary-foreground); }
+.dot-success { background: var(--status-success-icon); }
+.dot-neutral { background: var(--status-neutral-icon); }
+.dot-info { background: var(--status-info-icon); }
+.dot-warning { background: var(--status-warning-icon); }
+
+/* Pinned columns (md and up, as in DataTable.tsx): first data column + actions */
 @media (min-width: 768px) {
-  .pin-left, .pin-left-2, .pin-right { position: sticky; z-index: 10; background: var(--card); }
-  .pin-left { left: 0; }
-  .pin-left-2 { left: 3rem; }
-  .pin-right { right: 0; z-index: 20; }
-  thead .pin-left, thead .pin-left-2, thead .pin-right {
+  .dt-table .pin-left, .dt-table .pin-right { position: sticky; z-index: 10; background: var(--card); }
+  .dt-table .pin-left { left: 0; }
+  .dt-table .pin-right { right: 0; z-index: 20; }
+  thead .pin-left, thead .pin-right {
     background-image: linear-gradient(to right, color-mix(in oklab, var(--muted) 40%, transparent), color-mix(in oklab, var(--muted) 40%, transparent));
   }
-  tbody tr:hover .pin-left, tbody tr:hover .pin-left-2, tbody tr:hover .pin-right {
+  tbody tr:hover .pin-left, tbody tr:hover .pin-right {
     background-image: linear-gradient(to right, color-mix(in oklab, var(--muted) 30%, transparent), color-mix(in oklab, var(--muted) 30%, transparent));
   }
-  .pin-left-2::after, .pin-right::before {
+  .pin-left::after, .pin-right::before {
     content: ""; position: absolute; top: 0; bottom: 0; width: 0.5rem; pointer-events: none;
     transition: opacity 150ms;
   }
-  .pin-left-2::after { right: -0.5rem; background: linear-gradient(to right, color-mix(in oklab, var(--foreground) 8%, transparent), transparent); }
+  .pin-left::after { right: -0.5rem; background: linear-gradient(to right, color-mix(in oklab, var(--foreground) 8%, transparent), transparent); }
   .pin-right::before { left: -0.5rem; background: linear-gradient(to left, color-mix(in oklab, var(--foreground) 8%, transparent), transparent); }
 
   /* After: a shadow only where content is actually hidden under the pinned column */
-  .opt-shadows .dt-scroll:not(.is-scrolled) .pin-left-2::after { opacity: 0; }
+  .opt-shadows .dt-scroll:not(.is-scrolled) .pin-left::after { opacity: 0; }
   .opt-shadows .dt-scroll:not(.has-more) .pin-right::before { opacity: 0; }
 }
 
 .dt-foot {
-  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem;
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 0.75rem;
   padding: 0.75rem 1rem; border-top: 1px solid var(--border); font-size: 0.875rem; color: var(--muted-foreground);
 }
+.dt-foot .page-size { justify-self: end; }
 .pager { display: flex; align-items: center; gap: 0.25rem; }
 .pager button {
   width: 2rem; height: 2rem; display: inline-flex; align-items: center; justify-content: center;
-  border: 0; border-radius: var(--radius-lg); background: transparent; color: var(--foreground); cursor: pointer;
+  border: 0; border-radius: var(--radius-lg); background: transparent; color: var(--muted-foreground); cursor: pointer;
   font-variant-numeric: tabular-nums;
 }
 .pager button svg { width: 1rem; height: 1rem; }
-.pager button:hover { background: color-mix(in oklab, var(--muted) 40%, transparent); }
-.pager button[aria-current="page"] { background: var(--muted); }
+.pager button:hover:not([disabled]) { background: color-mix(in oklab, var(--muted) 40%, transparent); color: var(--foreground); }
+.pager button[aria-current="page"] { background: var(--muted); color: var(--foreground); }
+.pager button[disabled] { opacity: 0.5; cursor: default; }
 .page-size { width: auto; min-height: 2rem; padding: 0.25rem 0.5rem; }
+@media (max-width: 639px) {
+  .dt-foot { grid-template-columns: 1fr; justify-items: start; }
+  .dt-foot .page-size { justify-self: start; }
+}
 
 /* ── After: full width for table-only views ───────────────────── */
 .opt-width .view-list .content { max-width: none; margin-inline: 0; }
@@ -168,9 +218,11 @@
 
 /* ── Mobile: sidebar becomes a drawer below lg ─────────────────── */
 @media (max-width: 1023px) {
-  .app { grid-template-columns: minmax(0, 1fr); }
+  .app, .app.sidebar-collapsed { grid-template-columns: minmax(0, 1fr); }
   .sidebar { display: none; }
-  .content { padding: 1rem; }
+  .content { padding: 1rem 1rem 5rem; }
+  .topbar { padding: 0 0.75rem; }
+  .topbar-right > :not(.icon-btn) { display: none; }
 }
 
 /* ── Proposal panel (not part of the product UI) ──────────────── */
@@ -180,7 +232,7 @@
   border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
   font-size: 0.75rem;
 }
-@media (max-width: 1023px) { .proposal { left: auto; right: 0.5rem; } }
+@media (max-width: 1023px) { .proposal { left: auto; right: 0.5rem; bottom: 4rem; } }
 .proposal-head { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); }
 .proposal-head strong { font-size: 0.75rem; }
 .proposal-body { padding: 0.5rem 0.75rem 0.75rem; display: flex; flex-direction: column; gap: 0.5rem; }

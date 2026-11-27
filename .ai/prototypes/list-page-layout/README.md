@@ -25,7 +25,7 @@ This is a static HTML mockup, not implementation. It uses the app's own tokens: 
 - Today the whole page scrolls, so the column headers and the pagination scroll out of view.
 - Acceptance:
   - On desktop (≥ 1024 px) the table fills the remaining height. Its body scrolls, while the headers and the pagination stay in place.
-  - With few rows, the table shrinks and the pagination sits right below them. Set the page size to **3 per page**.
+  - With few rows, the table shrinks and the pagination sits right below them. Set the page size to **6 per page**.
   - Banners above the table reduce the table's height instead of pushing the pagination off screen. Turn on **Banner above table**.
   - There is only one vertical scrollbar.
   - Below 1024 px nothing changes; the page scrolls as today.
@@ -43,7 +43,7 @@ This is a static HTML mockup, not implementation. It uses the app's own tokens: 
 
 ## What does not change
 
-Colours, typography, toolbar, filters, row actions, the mobile layout and every page that does not opt in. The selection column is shown pinned, as in the approved #8961.
+Colours, typography, toolbar, filters, row actions, the mobile layout and every page that does not opt in. "Before" was measured against the People list on upstream `main`; the table card has the same position and width.
 
 ## Next step, out of scope
 

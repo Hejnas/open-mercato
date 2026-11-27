@@ -2,15 +2,16 @@
   'use strict'
 
   var CONTENT_CAP = 1536
-  var SIDEBAR = 240
   var TOTAL = 312
   var OPTIONS = ['opt-width', 'opt-pager', 'opt-shadows']
 
-  var firstNames = ['Maja', 'Oskar', 'Lena', 'Tomas', 'Ines', 'Felix', 'Nora', 'Emil', 'Clara', 'Jonas', 'Alma', 'Viktor', 'Ida', 'Hugo', 'Elsa', 'Leon', 'Sofia', 'Anton', 'Mila', 'Karl']
-  var lastNames = ['Lindqvist', 'Berg', 'Novak', 'Ferreira', 'Holm', 'Kowalczyk', 'Brandt', 'Moreau', 'Sato', 'Okafor', 'Varga', 'Nilsen', 'Duarte', 'Keller', 'Ricci', 'Larsen', 'Haas', 'Dumont', 'Ortega', 'Weiss']
-  var statuses = [['Active', 'badge-success'], ['Inactive', 'badge-neutral'], ['Prospect', 'badge-info'], ['At risk', 'badge-warning']]
-  var stages = ['Lead', 'Qualified', 'Customer', 'Champion', 'Churned']
-  var sources = ['Website', 'Referral', 'Trade show', 'Outbound', 'Partner']
+  var COLUMNS = ['Name', 'Email', 'Status', 'Lifecycle stage', 'Next interaction', 'Created', 'Source', 'Owner', 'Job title', 'Department', 'Seniority', 'Timezone']
+  var firstNames = ['Mia', 'Taylor', 'Daniel', 'Lena', 'Arjun', 'Naomi', 'Oskar', 'Ines', 'Felix', 'Nora', 'Emil', 'Clara', 'Jonas', 'Alma', 'Viktor', 'Ida', 'Hugo', 'Elsa', 'Leon', 'Sofia']
+  var lastNames = ['Johnson', 'Brooks', 'Cho', 'Ortiz', 'Patel', 'Harris', 'Lindqvist', 'Berg', 'Novak', 'Ferreira', 'Holm', 'Brandt', 'Moreau', 'Sato', 'Okafor', 'Varga', 'Nilsen', 'Duarte', 'Keller', 'Ricci']
+  var domains = ['brightsidesolar.com', 'copperleaf.design', 'harborviewanalytics.com', 'northwindtraders.example']
+  var statuses = [['Active', 'dot-success'], ['Active', 'dot-success'], ['Inactive', 'dot-neutral'], ['Prospect', 'dot-info'], ['At risk', 'dot-warning']]
+  var stages = ['Customer', 'Interested customer', 'Lead', 'Qualified', 'Champion']
+  var sources = ['Partner referral', 'Customer referral', 'Cold outreach', 'Conference / Event', 'Website']
   var owners = ['Anna Kowal', 'Ben Ortiz', 'Chloe Martin', 'Dev Patel']
   var titles = ['Head of Procurement', 'Operations Manager', 'CFO', 'Buyer', 'IT Director', 'Office Manager']
   var departments = ['Procurement', 'Operations', 'Finance', 'IT', 'Administration']
@@ -20,38 +21,45 @@
   function pick(list, index) { return list[index % list.length] }
 
   function formatDate(offsetDays) {
-    var date = new Date(Date.UTC(2026, 10, 27 + offsetDays))
-    return date.toISOString().slice(0, 10)
+    var date = new Date(Date.UTC(2026, 10, 5 + offsetDays))
+    return (date.getUTCMonth() + 1) + '/' + date.getUTCDate() + '/' + date.getUTCFullYear()
   }
 
-  function escapeHtml(value) {
-    return String(value).replace(/[&<>"']/g, function (char) {
-      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]
+  function cell(html) { return '<td><div class="cell">' + html + '</div></td>' }
+  function pill(text) { return '<span class="pill pill-secondary">' + text + '</span>' }
+  function none() { return '<span class="empty-value">None</span>' }
+
+  function buildHead() {
+    var html = '<th class="col-select"><button type="button" class="check" role="checkbox" aria-checked="false" aria-label="Select all"><svg><use href="#ic-check"/></svg></button></th>'
+    COLUMNS.forEach(function (label, index) {
+      html += '<th' + (index === 0 ? ' class="pin-left"' : '') + '><span class="th-sort">' + label +
+        '<svg aria-hidden="true"><use href="#ic-chevrons-up-down"/></svg></span><span class="th-resize" aria-hidden="true"></span></th>'
     })
+    html += '<th class="col-actions pin-right">Actions</th>'
+    document.getElementById('head-row').innerHTML = html
   }
 
   function buildRow(index) {
-    var first = pick(firstNames, index * 7 + 3)
-    var last = pick(lastNames, index * 3 + 1)
+    var first = pick(firstNames, index)
+    var last = pick(lastNames, index + Math.floor(index / 20) * 7)
     var status = pick(statuses, index)
-    var initials = first.charAt(0) + last.charAt(0)
-    var cells = [
-      '<td class="col-select pin-left"><button type="button" class="check" role="checkbox" aria-checked="false" aria-label="Select ' + escapeHtml(first + ' ' + last) + '"><svg><use href="#ic-check"/></svg></button></td>',
-      '<td class="pin-left-2"><span class="cell-name"><span class="avatar avatar-sm">' + initials + '</span>' + escapeHtml(first + ' ' + last) + '</span></td>',
-      '<td>' + escapeHtml((first + '.' + last).toLowerCase()) + '@example.com</td>',
-      '<td><span class="badge ' + status[1] + '"><span class="dot"></span>' + status[0] + '</span></td>',
-      '<td>' + pick(stages, index * 2) + '</td>',
-      '<td class="num">' + formatDate((index % 9) + 1) + '</td>',
-      '<td class="num">' + formatDate(-(index * 5 + 12)) + '</td>',
-      '<td>' + pick(sources, index) + '</td>',
-      '<td>' + pick(owners, index * 3) + '</td>',
-      '<td>' + pick(titles, index) + '</td>',
-      '<td>' + pick(departments, index * 2 + 1) + '</td>',
-      '<td>' + pick(seniorities, index) + '</td>',
-      '<td>' + pick(zones, index * 3) + '</td>',
-      '<td class="col-actions pin-right"><button type="button" class="btn btn-ghost btn-icon btn-sm" aria-label="Row actions"><svg><use href="#ic-more"/></svg></button></td>',
-    ]
-    return '<tr>' + cells.join('') + '</tr>'
+    var full = first + ' ' + last
+    return '<tr>' +
+      '<td class="col-select"><button type="button" class="check" role="checkbox" aria-checked="false" aria-label="Select ' + full + '"><svg><use href="#ic-check"/></svg></button></td>' +
+      '<td class="pin-left"><div class="cell"><a class="cell-name" href="#" data-open-form>' + full + '</a></div></td>' +
+      cell((first + '.' + last).toLowerCase() + '@' + pick(domains, index)) +
+      cell('<span class="pill"><span class="dot ' + status[1] + '"></span>' + status[0] + '</span>') +
+      cell(pill(pick(stages, index))) +
+      cell(index % 3 === 0 ? formatDate((index % 9) + 20) : none()) +
+      cell(formatDate(-(index % 7))) +
+      cell(pill(pick(sources, index))) +
+      cell(pick(owners, index * 3)) +
+      cell(pick(titles, index)) +
+      cell(pick(departments, index * 2 + 1)) +
+      cell(pick(seniorities, index)) +
+      cell(pick(zones, index * 3)) +
+      '<td class="col-actions pin-right"><button type="button" class="btn btn-ghost btn-icon btn-sm" aria-label="Row actions"><svg><use href="#ic-more"/></svg></button></td>' +
+      '</tr>'
   }
 
   var rowsBody = document.getElementById('rows')
@@ -63,11 +71,12 @@
 
   function renderRows() {
     var size = Number(pageSize.value)
-    var total = size === 3 ? 3 : TOTAL
+    var total = size === 6 ? 6 : TOTAL
     var html = ''
     for (var index = 0; index < size; index += 1) html += buildRow(index)
     rowsBody.innerHTML = html
-    resultCount.textContent = 'Showing 1 to ' + size + ' of ' + total + ' results'
+    resultCount.textContent = 'Showing 1 to ' + size + ' of ' + total + ' results in 0.4s'
+    document.querySelectorAll('.page-more').forEach(function (button) { button.hidden = total <= size })
     updateShadows()
   }
 
@@ -79,13 +88,14 @@
 
   function updateWidthStat() {
     var viewport = window.innerWidth
-    var available = Math.max(viewport - (viewport >= 1024 ? SIDEBAR : 0), 0)
+    var sidebar = viewport >= 1024 ? document.querySelector('.sidebar').getBoundingClientRect().width : 0
+    var available = Math.max(Math.round(viewport - sidebar), 0)
     var isList = app.classList.contains('view-list')
     var capped = !(isList && document.body.classList.contains('opt-width'))
     var used = capped ? Math.min(available, CONTENT_CAP) : available
     var unused = available > 0 ? Math.round(((available - used) / available) * 100) : 0
     widthStat.innerHTML = 'Window <b>' + viewport + ' px</b> · content <b>' + used + ' px</b><br>Unused width: <b>' + unused + '%</b>' +
-      (available <= CONTENT_CAP ? '<br>Below ~1780 px the cap is not visible.' : '')
+      (available <= CONTENT_CAP ? '<br>The cap shows on windows wider than ~' + Math.round(CONTENT_CAP + sidebar) + ' px.' : '')
   }
 
   function syncModeButtons() {
@@ -103,13 +113,6 @@
     if (toggle) toggle.setAttribute('aria-checked', enabled ? 'true' : 'false')
   }
 
-  function refresh() {
-    syncModeButtons()
-    updateWidthStat()
-    updateShadows()
-    writeHash()
-  }
-
   function writeHash() {
     var active = OPTIONS.filter(function (name) { return document.body.classList.contains(name) })
     var hash = active.length === OPTIONS.length ? 'after' : active.length === 0 ? 'before' : active.join(',')
@@ -123,13 +126,20 @@
     OPTIONS.forEach(function (name) { setOption(name, enabled.indexOf(name) !== -1) })
   }
 
+  function refresh() {
+    syncModeButtons()
+    updateWidthStat()
+    updateShadows()
+    writeHash()
+  }
+
   function setScreen(view) {
     var isList = view === 'list'
     app.classList.toggle('view-list', isList)
     app.classList.toggle('view-form', !isList)
     document.getElementById('view-list').hidden = !isList
     document.getElementById('view-form').hidden = isList
-    document.getElementById('crumb-here').textContent = isList ? 'People' : 'Maja Lindqvist'
+    document.getElementById('crumb-here').textContent = isList ? 'People' : 'Mia Johnson'
     document.getElementById('screen').value = view
     window.scrollTo(0, 0)
     refresh()
@@ -162,13 +172,20 @@
     event.currentTarget.setAttribute('aria-checked', dark ? 'true' : 'false')
   })
 
+  document.getElementById('sidebar-toggle').addEventListener('click', function () {
+    app.classList.toggle('sidebar-collapsed')
+    refresh()
+  })
+
   document.getElementById('screen').addEventListener('change', function (event) { setScreen(event.target.value) })
   document.querySelectorAll('[data-view]').forEach(function (element) {
     element.addEventListener('click', function () { setScreen(element.getAttribute('data-view')) })
   })
   rowsBody.addEventListener('click', function (event) {
-    var name = event.target.closest('.cell-name')
-    if (name) setScreen('form')
+    if (event.target.closest('[data-open-form]')) {
+      event.preventDefault()
+      setScreen('form')
+    }
   })
 
   var collapseButton = document.getElementById('proposal-collapse')
@@ -197,6 +214,7 @@
   scroller.addEventListener('scroll', updateShadows, { passive: true })
   window.addEventListener('resize', function () { updateWidthStat(); updateShadows() })
 
+  buildHead()
   readHash()
   renderRows()
   refresh()
