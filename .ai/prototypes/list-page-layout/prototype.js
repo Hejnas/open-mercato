@@ -36,7 +36,7 @@
       html += '<th' + (index === 0 ? ' class="pin-left"' : '') + '><span class="th-sort">' + label +
         '<svg aria-hidden="true"><use href="#ic-chevrons-up-down"/></svg></span><span class="th-resize" aria-hidden="true"></span></th>'
     })
-    html += '<th class="col-actions pin-right">Actions</th>'
+    html += '<th class="col-filler" aria-hidden="true"></th><th class="col-actions pin-right">Actions</th>'
     document.getElementById('head-row').innerHTML = html
   }
 
@@ -59,7 +59,7 @@
       cell(pick(departments, index * 2 + 1)) +
       cell(pick(seniorities, index)) +
       cell(pick(zones, index * 3)) +
-      '<td class="col-actions pin-right"><button type="button" class="btn btn-ghost btn-icon btn-sm" aria-label="Row actions"><svg><use href="#ic-more"/></svg></button></td>' +
+      '<td class="col-filler" aria-hidden="true"></td><td class="col-actions pin-right"><button type="button" class="btn btn-ghost btn-icon btn-sm" aria-label="Row actions"><svg><use href="#ic-more"/></svg></button></td>' +
       '</tr>'
   }
 
@@ -196,7 +196,7 @@
     ]
     document.getElementById('roles-rows').innerHTML = roles.map(function (role) {
       return '<tr><td><div class="cell"><a class="cell-name" href="#">' + role[0] + '</a></div></td><td><div class="cell">' + role[1] +
-        '</div></td><td class="num">' + role[2] + '</td><td class="col-actions"><button type="button" class="btn btn-ghost btn-icon btn-sm" aria-label="Row actions"><svg><use href="#ic-more"/></svg></button></td></tr>'
+        '</div></td><td class="num">' + role[2] + '</td><td class="col-filler" aria-hidden="true"></td><td class="col-actions"><button type="button" class="btn btn-ghost btn-icon btn-sm" aria-label="Row actions"><svg><use href="#ic-more"/></svg></button></td></tr>'
     }).join('')
     var accounts = [['Brightside Solar', 'Anna Kowal', '10/12/2026'], ['Copperleaf Design', 'Dev Patel', '10/30/2026'], ['Harborview Analytics', 'Ben Ortiz', '11/2/2026'], ['Northwind Traders', 'Chloe Martin', '11/9/2026']]
     document.getElementById('overview-accounts').innerHTML = accounts.map(function (row) {

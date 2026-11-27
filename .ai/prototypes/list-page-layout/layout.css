@@ -207,15 +207,16 @@ body:not(.demo-mode) .chat-bubble { display: none; }
 
 /* ── After: full width for table-only views ───────────────────── */
 .opt-width .view-list .content { max-width: none; margin-inline: 0; }
-/* The card grows only as wide as its columns need, anchored to the left */
-.opt-width .view-list .dt { align-self: flex-start; width: fit-content; max-width: calc(100% - 1rem); }
+/* Columns keep their natural width; the spare width collects before the frozen Actions column */
+.dt-table .col-filler { display: none; padding: 0; }
+.opt-width .view-list .dt-table .col-filler { display: table-cell; width: 100%; }
 
 /* ── After: pinned pagination, only the table body scrolls (desktop) ── */
 @media (min-width: 1024px) {
   .opt-pager .view-list.app { height: var(--app-height, 100svh); min-height: 0; }
   .opt-pager .view-list .main { height: var(--app-height, 100svh); overflow: hidden; }
   .opt-pager .view-list .content { min-height: 0; }
-  .opt-pager .view-list .dt { flex: 0 1 auto; min-height: 0; display: flex; flex-direction: column; }
+  .opt-pager .view-list .dt { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
   .opt-pager .view-list .dt-head, .opt-pager .view-list .dt-foot { flex: none; }
   .opt-pager .view-list .dt-scroll { flex: 1 1 auto; min-height: 0; }
 }

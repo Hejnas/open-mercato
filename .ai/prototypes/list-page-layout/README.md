@@ -19,7 +19,7 @@ This is a static HTML mockup, not implementation. It uses the app's own tokens: 
 - Acceptance:
   - A page opts in explicitly, e.g. `contentWidth: 'full'` in its page metadata. The default stays exactly as today, so pages and third-party modules that do not opt in are unchanged.
   - Opt in only where the table is the only element of the view (People, Companies, …).
-  - The table grows only as wide as its columns need and stays anchored to the left; the full width is only the upper limit. A table with four columns does not stretch across a 2560 px screen. Check **Screen → Team roles**.
+  - The table card and its header bar always span the full width, as in ClickUp, Asana or Jira. Columns keep their natural width instead of being stretched; the spare space sits between the last data column and the frozen Actions column at the right edge. Check **Screen → Team roles**.
   - Forms, detail pages and views with several sections keep the 1536 px cap. Check **Screen → Person form** and **Screen → Sales overview**.
 - Proposed rule in `.ai/ds-rules.md`: keep "Constrain max content width → `max-w-screen-2xl mx-auto`" and add "Exception: a view whose only element is a DataTable uses the full content width." Issue #8640 asks for the same.
 
@@ -31,7 +31,7 @@ This is a static HTML mockup, not implementation. It uses the app's own tokens: 
 - Acceptance:
   - On desktop (≥ 1024 px) the table fills the remaining height. Its body scrolls, while the headers and the pagination stay in place.
   - The mockup shows 100 rows per page by default, where the difference is most visible.
-  - With few rows, the table shrinks and the pagination sits right below them. Set the page size to **6 per page**, or open **Team roles**.
+  - The table card always fills the window height. With few rows the empty space stays inside the card and the pagination stays at the bottom. Set the page size to **6 per page**, or open **Team roles**.
   - A message above the table reduces the table's height instead of pushing the pagination off screen. Turn on **Show an alert above the table**.
   - There is only one vertical scrollbar.
   - Below 1024 px nothing changes; the page scrolls as today.
