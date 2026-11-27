@@ -1,6 +1,10 @@
 # List page layout: before / after
 
-A clickable proposal for three small changes to backend list pages. Open `index.html` and use the **Layout proposal** panel in the bottom-left corner. You can switch everything with **Before / After**, or each change on its own.
+A clickable proposal for three small changes to backend list pages. Open `index.html` and use the **Layout proposal** panel on the right. You can switch everything with **Before / After**, or each change on its own.
+
+- **Before** is upstream `main` today: the People list, measured in the running app.
+- **After** adds the three changes below, plus two fixes from open pull requests (items 4 and 5).
+- **Simulated screen** (default 2560 px, a 4K monitor at 150%) renders the mockup at that width, scaled down to fit your window. The full-width change only shows on wide screens, so you can see it on a laptop.
 
 This is a static HTML mockup, not implementation. It uses the app's own tokens: `tokens.css` is generated from `apps/mercato/src/app/globals.css` by `.ai/skills/om-mockup-prototype/scripts/sync-tokens.mjs`. All data is fictional.
 
@@ -26,7 +30,7 @@ This is a static HTML mockup, not implementation. It uses the app's own tokens: 
 - Acceptance:
   - On desktop (≥ 1024 px) the table fills the remaining height. Its body scrolls, while the headers and the pagination stay in place.
   - With few rows, the table shrinks and the pagination sits right below them. Set the page size to **6 per page**.
-  - Banners above the table reduce the table's height instead of pushing the pagination off screen. Turn on **Banner above table**.
+  - A message above the table reduces the table's height instead of pushing the pagination off screen. Turn on **Show an alert above the table**.
   - There is only one vertical scrollbar.
   - Below 1024 px nothing changes; the page scrolls as today.
 
@@ -41,9 +45,17 @@ This is a static HTML mockup, not implementation. It uses the app's own tokens: 
   - When all columns fit, there are no shadows.
   - Colours, widths and the md-and-up rule stay as today.
 
+### 4. Compact footer (from #9227)
+
+The demo-mode reserve for the floating contact button adds about 80 px below the content and another 80 px inside the footer. #9227 keeps the reserve only where it is needed and makes the footer row compact. Without it, the pinned pagination ends far above the bottom of the screen.
+
+### 5. Pinned selection column (from #8961)
+
+Today the pinned Name column slides over the checkboxes when the table scrolls sideways. #8961 pins the selection column too, with Name next to it.
+
 ## What does not change
 
-Colours, typography, toolbar, filters, row actions, the mobile layout and every page that does not opt in. "Before" was measured against the People list on upstream `main`; the table card has the same position and width.
+Colours, typography, toolbar, filters, row actions, the mobile layout and every page that does not opt in. "Before" was measured against the People list on upstream `main`; at the same window size the table card has the same position and width.
 
 ## Next step, out of scope
 
@@ -58,4 +70,4 @@ On phones the table is barely usable. A separate vertical card ("gallery") view 
 ## Mockup limitations
 
 - Icons are an inline SVG sprite and texts are hardcoded. Production code uses `lucide-react` and `useT()`.
-- The "Unused width" readout in the panel uses the browser window width.
+- The "Unused width" readout uses the simulated screen width, or the mockup area when the simulation is off.

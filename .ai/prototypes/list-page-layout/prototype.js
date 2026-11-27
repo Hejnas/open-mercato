@@ -3,7 +3,8 @@
 
   var CONTENT_CAP = 1536
   var TOTAL = 312
-  var OPTIONS = ['opt-width', 'opt-pager', 'opt-shadows']
+  var OPTIONS = ['opt-width', 'opt-pager', 'opt-shadows', 'opt-footer', 'opt-select']
+  var simWidth = 2560
 
   var COLUMNS = ['Name', 'Email', 'Status', 'Lifecycle stage', 'Next interaction', 'Created', 'Source', 'Owner', 'Job title', 'Department', 'Seniority', 'Timezone']
   var firstNames = ['Mia', 'Taylor', 'Daniel', 'Lena', 'Arjun', 'Naomi', 'Oskar', 'Ines', 'Felix', 'Nora', 'Emil', 'Clara', 'Jonas', 'Alma', 'Viktor', 'Ida', 'Hugo', 'Elsa', 'Leon', 'Sofia']
@@ -86,15 +87,35 @@
     scroller.classList.toggle('has-more', maxScroll - scroller.scrollLeft > 1)
   }
 
+  function availableWidth() {
+    var panel = window.innerWidth >= 1024 ? document.getElementById('proposal').offsetWidth : 0
+    return window.innerWidth - panel
+  }
+
+  function applySimulation() {
+    var available = availableWidth()
+    var simulated = simWidth > available && window.innerWidth >= 1024
+    var zoom = simulated ? available / simWidth : 1
+    document.body.classList.toggle('is-simulated', simulated)
+    document.documentElement.style.setProperty('--sim-width', String(simWidth))
+    document.documentElement.style.setProperty('--sim-zoom', String(zoom))
+    document.documentElement.style.setProperty('--app-height', simulated ? (window.innerHeight / zoom) + 'px' : '100svh')
+  }
+
+  function effectiveWidth() {
+    return document.body.classList.contains('is-simulated') ? simWidth : availableWidth()
+  }
+
   function updateWidthStat() {
-    var viewport = window.innerWidth
-    var sidebar = viewport >= 1024 ? document.querySelector('.sidebar').getBoundingClientRect().width : 0
+    var viewport = effectiveWidth()
+    var sidebar = viewport >= 1024 ? document.querySelector('.sidebar').offsetWidth : 0
     var available = Math.max(Math.round(viewport - sidebar), 0)
     var isList = app.classList.contains('view-list')
     var capped = !(isList && document.body.classList.contains('opt-width'))
     var used = capped ? Math.min(available, CONTENT_CAP) : available
     var unused = available > 0 ? Math.round(((available - used) / available) * 100) : 0
-    widthStat.innerHTML = 'Window <b>' + viewport + ' px</b> · content <b>' + used + ' px</b><br>Unused width: <b>' + unused + '%</b>' +
+    var label = document.body.classList.contains('is-simulated') ? 'Simulated screen' : 'Mockup area'
+    widthStat.innerHTML = label + ' <b>' + viewport + ' px</b> · content <b>' + used + ' px</b><br>Unused width: <b>' + unused + '%</b>' +
       (available <= CONTENT_CAP ? '<br>The cap shows on windows wider than ~' + Math.round(CONTENT_CAP + sidebar) + ' px.' : '')
   }
 
@@ -177,6 +198,12 @@
     refresh()
   })
 
+  document.getElementById('sim-width').addEventListener('change', function (event) {
+    simWidth = Number(event.target.value) || 0
+    applySimulation()
+    refresh()
+  })
+
   document.getElementById('screen').addEventListener('change', function (event) { setScreen(event.target.value) })
   document.querySelectorAll('[data-view]').forEach(function (element) {
     element.addEventListener('click', function () { setScreen(element.getAttribute('data-view')) })
@@ -212,9 +239,10 @@
 
   pageSize.addEventListener('change', renderRows)
   scroller.addEventListener('scroll', updateShadows, { passive: true })
-  window.addEventListener('resize', function () { updateWidthStat(); updateShadows() })
+  window.addEventListener('resize', function () { applySimulation(); updateWidthStat(); updateShadows() })
 
   buildHead()
+  applySimulation()
   readHash()
   renderRows()
   refresh()

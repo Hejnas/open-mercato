@@ -9,11 +9,11 @@
 [hidden] { display: none !important; }
 
 /* ── Shell ─────────────────────────────────────────────────────── */
-.app { --sidebar-width: 240px; display: grid; grid-template-columns: var(--sidebar-width) minmax(0, 1fr); min-height: 100svh; }
+.app { --sidebar-width: 240px; display: grid; grid-template-columns: var(--sidebar-width) minmax(0, 1fr); min-height: var(--app-height, 100svh); }
 .app.sidebar-collapsed { --sidebar-width: 80px; }
 
 .sidebar {
-  position: sticky; top: 0; height: 100svh; overflow-y: auto;
+  position: sticky; top: 0; height: var(--app-height, 100svh); overflow-y: auto;
   background: var(--background); color: var(--sidebar-foreground);
   border-right: 1px solid var(--border);
   padding: 1rem 0.75rem 16rem;
@@ -130,6 +130,7 @@
 .dt-table tbody tr { cursor: pointer; }
 .dt-table tbody tr:hover { background: color-mix(in oklab, var(--muted) 30%, transparent); }
 .dt-table .col-select { width: 2rem; }
+.opt-select .dt-table .col-select { width: 3rem; min-width: 3rem; max-width: 3rem; }
 .dt-table .col-actions { width: 0; text-align: right; }
 .cell { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 14rem; }
 .cell-name { font-weight: 500; color: var(--foreground); text-decoration: none; }
@@ -151,13 +152,15 @@
 
 /* Pinned columns (md and up, as in DataTable.tsx): first data column + actions */
 @media (min-width: 768px) {
-  .dt-table .pin-left, .dt-table .pin-right { position: sticky; z-index: 10; background: var(--card); }
+  .dt-table .pin-left, .dt-table .pin-right { position: sticky; z-index: 10; background-color: var(--card); }
   .dt-table .pin-left { left: 0; }
+  .opt-select .dt-table .col-select { position: sticky; left: 0; z-index: 10; background-color: var(--card); }
+  .opt-select .dt-table .pin-left { left: 3rem; }
   .dt-table .pin-right { right: 0; z-index: 20; }
-  thead .pin-left, thead .pin-right {
+  .dt-table thead .pin-left, .dt-table thead .pin-right, .opt-select .dt-table thead .col-select {
     background-image: linear-gradient(to right, color-mix(in oklab, var(--muted) 40%, transparent), color-mix(in oklab, var(--muted) 40%, transparent));
   }
-  tbody tr:hover .pin-left, tbody tr:hover .pin-right {
+  .dt-table tbody tr:hover .pin-left, .dt-table tbody tr:hover .pin-right, .opt-select .dt-table tbody tr:hover .col-select {
     background-image: linear-gradient(to right, color-mix(in oklab, var(--muted) 30%, transparent), color-mix(in oklab, var(--muted) 30%, transparent));
   }
   .pin-left::after, .pin-right::before {
@@ -193,13 +196,17 @@
   .dt-foot .page-size { justify-self: start; }
 }
 
+/* ── After: compact footer and smaller demo CTA reserve (#9227) ── */
+.opt-footer .content { padding-bottom: 3.25rem; }
+.opt-footer .app-foot { padding: 0.25rem 1rem; }
+
 /* ── After: full width for table-only views ───────────────────── */
 .opt-width .view-list .content { max-width: none; margin-inline: 0; }
 
 /* ── After: pinned pagination, only the table body scrolls (desktop) ── */
 @media (min-width: 1024px) {
-  .opt-pager .view-list.app { height: 100svh; min-height: 0; }
-  .opt-pager .view-list .main { height: 100svh; overflow: hidden; }
+  .opt-pager .view-list.app { height: var(--app-height, 100svh); min-height: 0; }
+  .opt-pager .view-list .main { height: var(--app-height, 100svh); overflow: hidden; }
   .opt-pager .view-list .content { min-height: 0; }
   .opt-pager .view-list .dt { flex: 0 1 auto; min-height: 0; display: flex; flex-direction: column; }
   .opt-pager .view-list .dt-head, .opt-pager .view-list .dt-foot { flex: none; }
@@ -246,3 +253,23 @@
 .proposal-stat { padding: 0.5rem; border-radius: var(--radius-md); background: var(--muted); color: var(--muted-foreground); line-height: 1.4; }
 .proposal-stat b { color: var(--foreground); }
 .proposal-link { color: var(--muted-foreground); }
+.proposal-hint { margin: -0.25rem 0 0; color: var(--muted-foreground); line-height: 1.4; }
+.pr-ref { color: var(--muted-foreground); }
+
+/* ── Simulated screen width: the app renders at a wide width, zoomed to fit the window ── */
+.is-simulated { overflow-x: hidden; }
+.is-simulated .app { width: calc(var(--sim-width) * 1px); zoom: var(--sim-zoom); }
+
+/* Desktop: the proposal panel is its own column on the right, so it never covers the mockup */
+@media (min-width: 1024px) {
+  body { display: flex; align-items: flex-start; }
+  .app { flex: 1 1 auto; min-width: 0; }
+  .is-simulated .app { flex: none; }
+  .proposal {
+    position: sticky; top: 0; left: auto; bottom: auto; flex: none;
+    width: 14rem; height: 100svh; overflow-y: auto;
+    border-width: 0 0 0 1px; border-radius: 0; box-shadow: none;
+  }
+  #proposal-collapse { display: none; }
+  .chat-bubble { right: 15rem; }
+}

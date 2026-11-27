@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="components.css">
 <link rel="stylesheet" href="layout.css">
 </head>
-<body class="opt-width opt-pager opt-shadows">
+<body class="opt-width opt-pager opt-shadows opt-footer opt-select">
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
 <symbol id="ic-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></symbol>
@@ -181,7 +181,18 @@
     <div class="toggle-row"><label for="t-width">1. Full width</label><button type="button" class="switch" role="switch" id="t-width" data-opt="opt-width" aria-checked="true"></button></div>
     <div class="toggle-row"><label for="t-pager">2. Pinned pagination</label><button type="button" class="switch" role="switch" id="t-pager" data-opt="opt-pager" aria-checked="true"></button></div>
     <div class="toggle-row"><label for="t-shadows">3. Shadows on overflow</label><button type="button" class="switch" role="switch" id="t-shadows" data-opt="opt-shadows" aria-checked="true"></button></div>
+    <div class="toggle-row"><label for="t-footer">4. Compact footer <span class="pr-ref">#9227</span></label><button type="button" class="switch" role="switch" id="t-footer" data-opt="opt-footer" aria-checked="true"></button></div>
+    <div class="toggle-row"><label for="t-select">5. Pinned checkboxes <span class="pr-ref">#8961</span></label><button type="button" class="switch" role="switch" id="t-select" data-opt="opt-select" aria-checked="true"></button></div>
     <hr class="separator">
+    <div class="toggle-row">
+      <span>Simulated screen</span>
+      <select class="select" id="sim-width" aria-label="Simulated screen width">
+        <option value="0">Your window</option>
+        <option value="1920">1920 px</option>
+        <option value="2560" selected>2560 px (4K)</option>
+        <option value="3840">3840 px</option>
+      </select>
+    </div>
     <div class="toggle-row">
       <span>Screen</span>
       <select class="select" id="screen" aria-label="Screen">
@@ -189,7 +200,8 @@
         <option value="form">Person form</option>
       </select>
     </div>
-    <div class="toggle-row"><label for="t-banner">Banner above table</label><button type="button" class="switch" role="switch" id="t-banner" aria-checked="false"></button></div>
+    <div class="toggle-row"><label for="t-banner">Show an alert above the table</label><button type="button" class="switch" role="switch" id="t-banner" aria-checked="false"></button></div>
+    <p class="proposal-hint">Edge case: when a message appears above the table, the table shrinks and the pagination stays visible.</p>
     <div class="toggle-row"><label for="t-theme">Dark theme</label><button type="button" class="switch" role="switch" id="t-theme" aria-checked="false"></button></div>
     <div class="proposal-stat" id="width-stat" aria-live="polite"></div>
     <a class="proposal-link" href="README.md">What changes and why</a>
