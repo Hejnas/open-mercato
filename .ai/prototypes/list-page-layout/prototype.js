@@ -40,6 +40,21 @@
     document.getElementById('head-row').innerHTML = html
   }
 
+  function person(index) {
+    var first = pick(firstNames, index)
+    var last = pick(lastNames, index + Math.floor(index / 20) * 7)
+    return { first: first, last: last, email: (first + '.' + last).toLowerCase() + '@' + pick(domains, index), title: pick(titles, index) }
+  }
+
+  function fillForm(index) {
+    var data = person(index)
+    document.getElementById('f-first').value = data.first
+    document.getElementById('f-last').value = data.last
+    document.getElementById('f-email').value = data.email
+    document.getElementById('f-job').value = data.title
+    VIEWS.form.crumb = data.first + ' ' + data.last
+  }
+
   function buildRow(index) {
     var first = pick(firstNames, index)
     var last = pick(lastNames, index + Math.floor(index / 20) * 7)
@@ -47,7 +62,7 @@
     var full = first + ' ' + last
     return '<tr>' +
       '<td class="col-select"><button type="button" class="check" role="checkbox" aria-checked="false" aria-label="Select ' + full + '"><svg><use href="#ic-check"/></svg></button></td>' +
-      '<td class="pin-left"><div class="cell"><a class="cell-name" href="#" data-open-form>' + full + '</a></div></td>' +
+      '<td class="pin-left"><div class="cell"><a class="cell-name" href="#" data-open-form="' + index + '">' + full + '</a></div></td>' +
       cell((first + '.' + last).toLowerCase() + '@' + pick(domains, index)) +
       cell('<span class="pill"><span class="dot ' + status[1] + '"></span>' + status[0] + '</span>') +
       cell(pill(pick(stages, index))) +
@@ -137,17 +152,65 @@
     if (toggle) toggle.setAttribute('aria-checked', enabled ? 'true' : 'false')
   }
 
+  var DEFAULT_SIM_WIDTH = 2560
+  var showBanner = false
+  var currentView = 'list'
+  var initialView = 'list'
+
+  function setSwitch(id, on) {
+    document.getElementById(id).setAttribute('aria-checked', on ? 'true' : 'false')
+  }
+
+  function setTheme(dark) {
+    document.documentElement.classList.toggle('dark', dark)
+    setSwitch('t-theme', dark)
+  }
+
+  function setDemo(demo) {
+    document.body.classList.toggle('demo-mode', demo)
+    setSwitch('t-demo', demo)
+  }
+
+  function setBanner(show) {
+    showBanner = show
+    setSwitch('t-banner', show)
+    placeBanner()
+  }
+
   function writeHash() {
     var active = OPTIONS.filter(function (name) { return document.body.classList.contains(name) })
-    var hash = active.length === OPTIONS.length ? 'after' : active.length === 0 ? 'before' : active.join(',')
-    if (window.history && window.history.replaceState) window.history.replaceState(null, '', '#' + hash)
+    var parts = [active.length === OPTIONS.length ? 'after' : active.length === 0 ? 'before' : active.join(',')]
+    if (currentView !== 'list') parts.push('view=' + currentView)
+    if (document.documentElement.classList.contains('dark')) parts.push('theme=dark')
+    if (document.body.classList.contains('demo-mode')) parts.push('demo=1')
+    if (showBanner) parts.push('alert=1')
+    if (simWidth !== DEFAULT_SIM_WIDTH) parts.push('screen=' + simWidth)
+    if (app.classList.contains('sidebar-collapsed')) parts.push('sidebar=collapsed')
+    if (window.history && window.history.replaceState) window.history.replaceState(null, '', '#' + parts.join('&'))
   }
 
   function readHash() {
-    var hash = window.location.hash.replace('#', '')
-    if (!hash) return
-    var enabled = hash === 'after' ? OPTIONS : hash === 'before' ? [] : hash.split(',')
-    OPTIONS.forEach(function (name) { setOption(name, enabled.indexOf(name) !== -1) })
+    var raw = window.location.hash.replace('#', '')
+    if (!raw) return
+    var parts = raw.split('&')
+    var params = {}
+    parts.forEach(function (part) {
+      var separator = part.indexOf('=')
+      if (separator > 0) params[part.slice(0, separator)] = decodeURIComponent(part.slice(separator + 1))
+    })
+    if (parts[0].indexOf('=') === -1) {
+      var enabled = parts[0] === 'after' ? OPTIONS : parts[0] === 'before' ? [] : parts[0].split(',')
+      OPTIONS.forEach(function (name) { setOption(name, enabled.indexOf(name) !== -1) })
+    }
+    if (params.theme === 'dark') setTheme(true)
+    if (params.demo === '1') setDemo(true)
+    if (params.alert === '1') { showBanner = true; setSwitch('t-banner', true) }
+    if (params.screen !== undefined) {
+      simWidth = Number(params.screen) || 0
+      document.getElementById('sim-width').value = String(simWidth)
+    }
+    if (params.sidebar === 'collapsed') app.classList.add('sidebar-collapsed')
+    if (params.view && VIEWS[params.view]) initialView = params.view
   }
 
   function refresh() {
@@ -157,17 +220,12 @@
     writeHash()
   }
 
-  var showBanner = false
-  var currentView = 'list'
-
   function placeBanner() {
     var config = VIEWS[currentView] || VIEWS.list
     var banner = document.getElementById('banner')
-    if (config.tableOnly) {
-      var main = document.getElementById(config.main)
-      if (banner.parentNode !== main) main.insertBefore(banner, main.firstChild)
-    }
-    banner.hidden = !(showBanner && config.tableOnly)
+    var main = document.getElementById(config.main)
+    if (banner.parentNode !== main) main.insertBefore(banner, main.firstChild)
+    banner.hidden = !showBanner
   }
 
   var VIEWS = {
@@ -190,10 +248,13 @@
       if (active) item.setAttribute('aria-current', 'page')
       else item.removeAttribute('aria-current')
     })
+    document.querySelectorAll('.view-nav [data-view]').forEach(function (item) {
+      if (item.getAttribute('data-view') === view) item.setAttribute('aria-current', 'page')
+      else item.removeAttribute('aria-current')
+    })
     currentView = view
     placeBanner()
     document.getElementById('crumb-here').textContent = config.crumb
-    document.getElementById('screen').value = view
     window.scrollTo(0, 0)
     refresh()
   }
@@ -285,20 +346,30 @@
     })
   })
 
-  document.getElementById('t-banner').addEventListener('click', function (event) {
-    showBanner = !showBanner
-    event.currentTarget.setAttribute('aria-checked', showBanner ? 'true' : 'false')
-    placeBanner()
+  document.getElementById('t-banner').addEventListener('click', function () {
+    setBanner(!showBanner)
+    refresh()
   })
 
-  document.getElementById('t-demo').addEventListener('click', function (event) {
-    var demo = document.body.classList.toggle('demo-mode')
-    event.currentTarget.setAttribute('aria-checked', demo ? 'true' : 'false')
+  document.getElementById('t-demo').addEventListener('click', function () {
+    setDemo(!document.body.classList.contains('demo-mode'))
+    refresh()
   })
 
-  document.getElementById('t-theme').addEventListener('click', function (event) {
-    var dark = document.documentElement.classList.toggle('dark')
-    event.currentTarget.setAttribute('aria-checked', dark ? 'true' : 'false')
+  document.getElementById('t-theme').addEventListener('click', function () {
+    setTheme(!document.documentElement.classList.contains('dark'))
+    refresh()
+  })
+
+  document.addEventListener('click', function (event) {
+    var range = event.target.closest('.kpi-range button')
+    if (range) {
+      range.parentNode.querySelectorAll('button').forEach(function (button) {
+        button.setAttribute('aria-selected', button === range ? 'true' : 'false')
+      })
+    }
+    var link = event.target.closest('a[href="#"]')
+    if (link) event.preventDefault()
   })
 
   document.getElementById('sidebar-toggle').addEventListener('click', function () {
@@ -312,13 +383,14 @@
     refresh()
   })
 
-  document.getElementById('screen').addEventListener('change', function (event) { setScreen(event.target.value) })
   document.querySelectorAll('[data-view]').forEach(function (element) {
     element.addEventListener('click', function () { setScreen(element.getAttribute('data-view')) })
   })
   rowsBody.addEventListener('click', function (event) {
-    if (event.target.closest('[data-open-form]')) {
+    var link = event.target.closest('[data-open-form]')
+    if (link) {
       event.preventDefault()
+      fillForm(Number(link.getAttribute('data-open-form')))
       setScreen('form')
     }
   })
@@ -339,7 +411,7 @@
     if (!check) return
     var checked = check.getAttribute('aria-checked') !== 'true'
     if (check.closest('thead')) {
-      document.querySelectorAll('.dt-table .check').forEach(function (box) { box.setAttribute('aria-checked', checked ? 'true' : 'false') })
+      check.closest('table').querySelectorAll('.check').forEach(function (box) { box.setAttribute('aria-checked', checked ? 'true' : 'false') })
     } else {
       check.setAttribute('aria-checked', checked ? 'true' : 'false')
     }
@@ -425,8 +497,8 @@
   buildHead()
   buildStaticTables()
   buildDeals()
-  applySimulation()
   readHash()
+  applySimulation()
   renderRows()
-  refresh()
+  setScreen(initialView)
 })()

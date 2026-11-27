@@ -8,6 +8,17 @@
 
 [hidden] { display: none !important; }
 
+/* Same thin scrollbar as apps/mercato/src/app/globals.css */
+* { scrollbar-width: thin; scrollbar-color: color-mix(in oklch, var(--muted-foreground) 30%, transparent) transparent; }
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background-color: color-mix(in oklch, var(--muted-foreground) 30%, transparent);
+  border-radius: 9999px; border: 2px solid transparent; background-clip: padding-box;
+}
+*::-webkit-scrollbar-thumb:hover { background-color: color-mix(in oklch, var(--muted-foreground) 50%, transparent); }
+*::-webkit-scrollbar-corner { background: transparent; }
+
 /* ── Shell ─────────────────────────────────────────────────────── */
 .app { --sidebar-width: 240px; display: grid; grid-template-columns: var(--sidebar-width) minmax(0, 1fr); min-height: var(--app-height, 100svh); }
 .app.sidebar-collapsed { --sidebar-width: 80px; }
@@ -87,7 +98,7 @@
   display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 1rem;
   padding: 0.75rem 1rem; border-top: 1px solid var(--border);
   background: color-mix(in oklab, var(--background) 80%, transparent);
-  font-size: 0.75rem; color: var(--muted-foreground);
+  font-size: 0.75rem; line-height: 1rem; color: var(--muted-foreground);
 }
 .chat-bubble {
   position: fixed; right: 1rem; bottom: 1rem; z-index: 50;
@@ -103,6 +114,7 @@
 .dt-head-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem; min-height: 2.25rem; }
 .dt-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
 .dt-toolbar { margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--border); display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+.dt-toolbar.with-bulk { min-height: calc(0.75rem + 1px + 2.375rem); }
 .dt-toolbar-right { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-left: auto; }
 .dt-search { position: relative; width: 20rem; max-width: 100%; }
 .dt-search svg { position: absolute; left: 0.75rem; top: 50%; width: 1rem; height: 1rem; transform: translateY(-50%); color: var(--muted-foreground); }
@@ -116,7 +128,7 @@
 .dt-table thead tr { background: color-mix(in oklab, var(--muted) 40%, transparent); }
 .dt-table th {
   position: relative; text-align: left; font-weight: 500; color: var(--muted-foreground);
-  padding: 0.5rem 1rem; border-bottom: 1px solid var(--border); white-space: nowrap;
+  padding: 0.5rem 1rem; white-space: nowrap;
 }
 .th-sort { display: inline-flex; align-items: center; gap: 0.25rem; }
 .th-sort svg { width: 0.875rem; height: 0.875rem; color: color-mix(in oklab, var(--muted-foreground) 50%, transparent); }
@@ -128,8 +140,10 @@
 .th-resize { touch-action: none; }
 .th-resize:hover::before, .is-resizing .th-resize::before { height: 100%; background: var(--muted-foreground); }
 .is-resizing, .is-resizing * { cursor: col-resize !important; user-select: none; }
-.dt-table td { padding: 0.5rem 1rem; border-bottom: 1px solid var(--border); white-space: nowrap; vertical-align: middle; height: 3rem; }
-.dt-table tbody tr:last-child td { border-bottom: 0; }
+.dt-table td { padding: 0.5rem 1rem; white-space: nowrap; vertical-align: middle; }
+.dt-table tbody tr { border-bottom: 1px solid var(--border); }
+.dt .t-table-title { line-height: 1.5rem; }
+.dt-table tbody tr:last-child { border-bottom: 0; }
 .dt-table tbody tr { cursor: pointer; }
 .dt-table tbody tr:hover { background: color-mix(in oklab, var(--muted) 30%, transparent); }
 .dt-table .col-select { width: 2rem; }
@@ -211,7 +225,7 @@ body:not(.demo-mode) .chat-bubble { display: none; }
 /* ── Deals: view tabs, KPI strip and richer cells ─────────────── */
 .view-tabs { flex: none; display: flex; align-items: flex-end; gap: 0.25rem; border-bottom: 1px solid var(--border); }
 .view-tabs button {
-  border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px; background: transparent; cursor: pointer;
+  border: 0; border-bottom: 2px solid transparent; background: transparent; cursor: pointer;
   padding: 0.625rem 0.875rem; font-size: 0.875rem; color: var(--muted-foreground);
 }
 .view-tabs button[aria-current="page"] { border-bottom-color: var(--accent-indigo); font-weight: 600; color: var(--foreground); }
@@ -219,18 +233,23 @@ body:not(.demo-mode) .chat-bubble { display: none; }
 .kpi-grid { flex: 1; min-width: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; background: var(--border); }
 @media (min-width: 1280px) { .kpi-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 .kpi { background: var(--card); padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; }
-.kpi-label { font-size: 0.75rem; color: var(--muted-foreground); }
-.kpi-value { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.5rem; font-size: 1.5rem; line-height: 2rem; }
-.kpi-value small { font-size: 0.75rem; color: var(--muted-foreground); }
-.kpi-range { flex: none; display: flex; align-items: center; padding: 0 1rem; border-left: 1px solid var(--border); }
+.kpi-label { font-size: 0.75rem; line-height: 1rem; color: var(--muted-foreground); }
+.kpi:first-child .kpi-label { color: var(--foreground); }
+.kpi-value { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.5rem; height: 2rem; font-size: 1.5rem; line-height: 2rem; }
+.kpi-value small { font-size: 0.75rem; line-height: 1rem; color: var(--muted-foreground); }
+.kpi-value .badge { line-height: 1rem; }
+.kpi-range { flex: none; display: flex; align-items: center; padding: 0.5rem 0.75rem; border-left: 1px solid var(--border); }
+.kpi-range .segmented { padding: 0.125rem; gap: 0; }
+.kpi-range .segmented > button { height: 1.5rem; padding: 0 0.625rem; font-size: 0.75rem; }
 .cell-title { display: flex; align-items: center; gap: 0.5rem; max-width: 20rem; }
 .title-icon {
   width: 1.75rem; height: 1.75rem; flex: none; border-radius: var(--radius-md); background: var(--muted);
   display: inline-flex; align-items: center; justify-content: center; color: var(--muted-foreground);
 }
 .title-icon svg { width: 1rem; height: 1rem; }
-.cell-two { display: flex; flex-direction: column; line-height: 1.25; }
-.cell-two small { font-size: 0.75rem; color: var(--muted-foreground); }
+.cell-two { display: flex; flex-direction: column; }
+.cell-two > span { line-height: 1.25rem; }
+.cell-two small { font-size: 0.75rem; line-height: 1rem; color: var(--muted-foreground); }
 .dt-table .badge { font-weight: 600; }
 .initials { display: inline-flex; gap: 0.25rem; }
 .initials span { font-size: 0.75rem; font-weight: 600; color: var(--accent-indigo); }
@@ -245,7 +264,7 @@ body:not(.demo-mode) .chat-bubble { display: none; }
 .demo-mode.opt-footer.opt-frameless .view-list .content { padding-bottom: 3.25rem; }
 .opt-frameless .view-list .dt { border: 0; border-radius: 0; background: var(--background); margin-inline: 0; }
 .opt-frameless .view-list .dt-head { padding: 0.75rem 0; border-bottom: 0; }
-.opt-frameless .view-list .dt-toolbar { margin-top: 0.5rem; padding-top: 0; border-top: 0; }
+.opt-frameless .view-list .dt-toolbar { margin-top: 0.5rem; padding-top: 0; border-top: 0; min-height: 0; }
 .opt-frameless .view-list .dt-table thead,
 .opt-frameless .view-list .dt-table .pin-left,
 .opt-frameless .view-list .dt-table .pin-right,
@@ -319,6 +338,18 @@ body:not(.demo-mode) .chat-bubble { display: none; }
 .proposal-link { color: var(--muted-foreground); }
 .proposal-hint { margin: -0.25rem 0 0; color: var(--muted-foreground); line-height: 1.4; }
 .proposal-intro { margin: 0; line-height: 1.4; }
+.proposal-label { font-weight: 600; color: var(--foreground); padding: 0 0.5rem 0.125rem; }
+.view-nav { display: flex; flex-direction: column; gap: 0.125rem; }
+.view-nav button {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 0;
+  border: 0; border-radius: var(--radius-md); background: transparent; cursor: pointer;
+  padding: 0.25rem 0.5rem; text-align: left; font-size: 0.75rem; color: var(--foreground);
+}
+.view-nav button span { color: var(--muted-foreground); font-size: 0.6875rem; }
+.view-nav button:hover { background: var(--accent); }
+.view-nav button[aria-current="page"] { background: var(--muted); font-weight: 600; }
+.view-nav button[aria-current="page"] span { font-weight: 400; }
+.nav-item[aria-disabled="true"], .view-tabs button[aria-disabled="true"] { cursor: not-allowed; }
 .pr-ref { color: var(--muted-foreground); }
 
 /* ── Simulated screen width: the app renders at a wide width, zoomed to fit the window ── */

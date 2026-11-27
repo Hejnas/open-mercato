@@ -46,15 +46,15 @@
     <div class="nav-group"><span class="label">Customers</span><svg><use href="#ic-chevron-down"/></svg></div>
     <div class="nav-items">
       <button type="button" class="nav-item" data-view="overview"><svg><use href="#ic-home"/></svg><span class="label">Sales overview</span></button>
-      <button type="button" class="nav-item"><svg><use href="#ic-building"/></svg><span class="label">Companies</span></button>
-      <button type="button" class="nav-item"><svg><use href="#ic-calendar"/></svg><span class="label">Calendar</span></button>
+      <button type="button" class="nav-item" aria-disabled="true" title="Not part of this mockup"><svg><use href="#ic-building"/></svg><span class="label">Companies</span></button>
+      <button type="button" class="nav-item" aria-disabled="true" title="Not part of this mockup"><svg><use href="#ic-calendar"/></svg><span class="label">Calendar</span></button>
       <button type="button" class="nav-item active" data-view="list" aria-current="page"><svg><use href="#ic-users"/></svg><span class="label">People</span></button>
       <button type="button" class="nav-item" data-view="deals"><svg><use href="#ic-briefcase"/></svg><span class="label">Deals</span></button>
     </div>
     <div class="nav-group"><span class="label">Settings</span><svg><use href="#ic-chevron-down"/></svg></div>
     <div class="nav-items">
       <button type="button" class="nav-item" data-view="roles"><svg><use href="#ic-users"/></svg><span class="label">Team roles</span></button>
-      <button type="button" class="nav-item"><svg><use href="#ic-settings"/></svg><span class="label">System</span></button>
+      <button type="button" class="nav-item" aria-disabled="true" title="Not part of this mockup"><svg><use href="#ic-settings"/></svg><span class="label">System</span></button>
     </div>
   </aside>
 
@@ -97,12 +97,13 @@
               <button type="button" class="btn btn-primary">New Person</button>
             </div>
           </div>
-          <div class="dt-toolbar">
+          <div class="dt-toolbar with-bulk">
             <div class="dt-search"><svg><use href="#ic-search"/></svg><input class="input" type="search" placeholder="Search people" aria-label="Search people"></div>
             <button type="button" class="btn btn-outline"><svg><use href="#ic-sparkles"/></svg> AI</button>
             <div class="dt-toolbar-right">
               <button type="button" class="btn btn-outline"><svg><use href="#ic-filter"/></svg> Filters</button>
               <button type="button" class="btn btn-outline split"><svg><use href="#ic-sliders"/></svg> Perspectives <span class="split-sep"></span><span class="muted">All views</span> <svg><use href="#ic-chevron-down"/></svg></button>
+              <button type="button" class="btn btn-outline" disabled title="Bulk action injected by the example module">Set normal priority</button>
             </div>
           </div>
         </div>
@@ -149,9 +150,9 @@
         <div class="group">
           <h3>Details</h3>
           <div class="fields-2">
-            <div class="field"><label for="f-first">First name</label><input class="input" id="f-first" value="Maja"></div>
-            <div class="field"><label for="f-last">Last name</label><input class="input" id="f-last" value="Lindqvist"></div>
-            <div class="field"><label for="f-email">Email</label><input class="input" id="f-email" value="maja.lindqvist@example.com"></div>
+            <div class="field"><label for="f-first">First name</label><input class="input" id="f-first" value="Mia"></div>
+            <div class="field"><label for="f-last">Last name</label><input class="input" id="f-last" value="Johnson"></div>
+            <div class="field"><label for="f-email">Email</label><input class="input" id="f-email" value="mia.johnson@brightsidesolar.com"></div>
             <div class="field"><label for="f-job">Job title</label><input class="input" id="f-job" value="Head of Procurement"></div>
           </div>
           <div class="field"><label for="f-desc">Description</label><textarea class="textarea" id="f-desc">Prefers email. Quarterly review in March.</textarea></div>
@@ -166,9 +167,9 @@
 
     <main class="content" id="view-deals" hidden>
       <nav class="view-tabs" aria-label="Deal views">
-        <button type="button">Kanban</button>
+        <button type="button" aria-disabled="true" title="Not part of this mockup">Kanban</button>
         <button type="button" aria-current="page">List</button>
-        <button type="button">Map</button>
+        <button type="button" aria-disabled="true" title="Not part of this mockup">Map</button>
       </nav>
       <section class="kpi-strip" aria-label="Pipeline summary">
         <div class="kpi-grid">
@@ -315,6 +316,14 @@
   </div>
   <div class="proposal-body">
     <p class="proposal-intro">Proposal for table-only list pages. Switch Before/After or each change; the simulated screen shows a wide monitor on any laptop.</p>
+    <nav class="view-nav" aria-label="Mockup screens">
+      <span class="proposal-label">Screens</span>
+      <button type="button" data-view="list" aria-current="page">People <span>many columns</span></button>
+      <button type="button" data-view="deals">Deals <span>summary above the table</span></button>
+      <button type="button" data-view="roles">Team roles <span>few columns</span></button>
+      <button type="button" data-view="form">Person form <span>keeps the 1536 px cap</span></button>
+      <button type="button" data-view="overview">Sales overview <span>keeps the 1536 px cap</span></button>
+    </nav>
     <div class="segmented" role="tablist" aria-label="Compare">
       <button type="button" role="tab" data-mode="before" aria-selected="false">Before</button>
       <button type="button" role="tab" data-mode="after" aria-selected="true">After</button>
@@ -341,19 +350,8 @@
         <option value="3840">3840 px</option>
       </select>
     </div>
-    <div class="toggle-row">
-      <span>Screen</span>
-      <select class="select" id="screen" aria-label="Screen">
-        <option value="list">People</option>
-        <option value="deals">Deals</option>
-        <option value="roles">Team roles</option>
-        <option value="form">Person form</option>
-        <option value="overview">Sales overview</option>
-      </select>
-    </div>
-    <p class="proposal-hint">People: many columns. Deals: summary above the table. Team roles: few columns. These are table-only views. Person form and Sales overview keep the 1536 px cap.</p>
-    <div class="toggle-row"><label for="t-banner">Show an alert above the table</label><button type="button" class="switch" role="switch" id="t-banner" aria-checked="false"></button></div>
-    <p class="proposal-hint">Edge case: when a message appears above the table, the table shrinks and the pagination stays visible.</p>
+    <div class="toggle-row"><label for="t-banner">Show an alert at the top</label><button type="button" class="switch" role="switch" id="t-banner" aria-checked="false"></button></div>
+    <p class="proposal-hint">Edge case: when a message appears above a table, the table shrinks and the pagination stays visible.</p>
     <div class="toggle-row"><label for="t-demo">Demo mode</label><button type="button" class="switch" role="switch" id="t-demo" aria-checked="false"></button></div>
     <p class="proposal-hint">Only the demo shows the floating contact button and reserves space for it at the bottom.</p>
     <div class="toggle-row"><label for="t-theme">Dark theme</label><button type="button" class="switch" role="switch" id="t-theme" aria-checked="false"></button></div>

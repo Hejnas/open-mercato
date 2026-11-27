@@ -1,6 +1,6 @@
 # List page layout: before / after
 
-A clickable proposal for three small changes to backend list pages. Open `index.html` and use the **Layout proposal** panel on the right. You can switch everything with **Before / After**, or each change on its own.
+A clickable proposal for three small changes to backend list pages. Open `index.html` and use the **Layout proposal** panel on the right: its **Screens** list moves between the views, and every setting is kept in the address, so a copied link opens exactly what you see. You can switch everything with **Before / After**, or each change on its own.
 
 - **Before** is upstream `main` today: the People list, measured in the running app.
 - **After** adds the three changes below, two fixes from open pull requests (items 4 and 5) and a frameless table (item 6).
@@ -18,9 +18,9 @@ This is a static HTML mockup, not implementation. It uses the app's own tokens: 
 - Unused width of the content area: about **9%** at 1920 px, **34%** at 2560 px (4K at 150%), **57%** at 3840 px (4K at 100%). Below ~1780 px the cap is not visible.
 - Acceptance:
   - A page opts in explicitly, e.g. `contentWidth: 'full'` in its page metadata. The default stays exactly as today, so pages and third-party modules that do not opt in are unchanged.
-  - Opt in only where the table is the only element of the view (People, Companies, …). A list with a summary above it, such as Deals with its KPI strip and view tabs, counts as a table-only view: the summary describes the same table. Check **Screen → Deals**.
-  - The table card and its header bar always span the full width, as in ClickUp, Asana or Jira. Columns keep their natural width instead of being stretched; the spare space sits between the last data column and the frozen Actions column at the right edge. Check **Screen → Team roles**.
-  - Forms, detail pages and views with several sections keep the 1536 px cap. Check **Screen → Person form** and **Screen → Sales overview**.
+  - Opt in only where the table is the only element of the view (People, Companies, …). A list with a summary above it, such as Deals with its KPI strip and view tabs, counts as a table-only view: the summary describes the same table. Check **Screens → Deals**.
+  - The table card and its header bar always span the full width, as in ClickUp, Asana or Jira. Columns keep their natural width instead of being stretched; the spare space sits between the last data column and the frozen Actions column at the right edge. Check **Screens → Team roles**.
+  - Forms, detail pages and views with several sections keep the 1536 px cap. Check **Screens → Person form** and **Screens → Sales overview**.
 - Proposed rule in `.ai/ds-rules.md`: keep "Constrain max content width → `max-w-screen-2xl mx-auto`" and add "Exception: a view whose only element is a DataTable uses the full content width." Issue #8640 asks for the same.
 
 ### 2. Pinned pagination, only the table body scrolls
@@ -32,7 +32,7 @@ This is a static HTML mockup, not implementation. It uses the app's own tokens: 
   - On desktop (≥ 1024 px) the table fills the remaining height. Its body scrolls, while the headers and the pagination stay in place.
   - The mockup shows 100 rows per page by default, where the difference is most visible.
   - The table card always fills the window height. With few rows the empty space stays inside the card and the pagination stays at the bottom. Set the page size to **6 per page**, or open **Team roles**.
-  - A message above the table reduces the table's height instead of pushing the pagination off screen. Turn on **Show an alert above the table**.
+  - A message above the table reduces the table's height instead of pushing the pagination off screen. Turn on **Show an alert at the top**.
   - There is only one vertical scrollbar.
   - Below 1024 px nothing changes; the page scrolls as today.
 
