@@ -47,7 +47,7 @@ This is a static HTML mockup, not implementation. It uses the app's own tokens: 
 
 ### 4. Compact footer (from #9227)
 
-The demo-mode reserve for the floating contact button adds about 80 px below the content and another 80 px inside the footer. #9227 keeps the reserve only where it is needed and makes the footer row compact. Without it, the pinned pagination ends far above the bottom of the screen.
+#9227 makes the footer row compact. In demo mode it also cuts the reserve for the floating contact button: today it adds about 80 px below the content and another 80 px inside the footer, so the pinned pagination ends far above the bottom of the screen. Turn on **Demo mode** in the panel to see it (off by default, as in a production install).
 
 ### 5. Pinned selection column (from #8961)
 

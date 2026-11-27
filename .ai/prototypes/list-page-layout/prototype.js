@@ -188,6 +188,11 @@
     event.currentTarget.setAttribute('aria-checked', banner.hidden ? 'false' : 'true')
   })
 
+  document.getElementById('t-demo').addEventListener('click', function (event) {
+    var demo = document.body.classList.toggle('demo-mode')
+    event.currentTarget.setAttribute('aria-checked', demo ? 'true' : 'false')
+  })
+
   document.getElementById('t-theme').addEventListener('click', function (event) {
     var dark = document.documentElement.classList.toggle('dark')
     event.currentTarget.setAttribute('aria-checked', dark ? 'true' : 'false')

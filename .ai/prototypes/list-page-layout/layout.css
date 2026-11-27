@@ -81,11 +81,11 @@
 
 .content {
   flex: 1; width: 100%; max-width: 1536px; margin-inline: auto;
-  padding: 1.5rem 1.5rem 5rem; display: flex; flex-direction: column; gap: 1rem; min-width: 0;
+  padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; min-width: 0;
 }
 .app-foot {
   display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 1rem;
-  padding: 0.75rem 1rem 5rem; border-top: 1px solid var(--border);
+  padding: 0.75rem 1rem; border-top: 1px solid var(--border);
   background: color-mix(in oklab, var(--background) 80%, transparent);
   font-size: 0.75rem; color: var(--muted-foreground);
 }
@@ -196,9 +196,14 @@
   .dt-foot .page-size { justify-self: start; }
 }
 
+/* ── Demo mode: floating contact button and its bottom reserve (main today) ── */
+body:not(.demo-mode) .chat-bubble { display: none; }
+.demo-mode .content { padding-bottom: 5rem; }
+.demo-mode .app-foot { padding-bottom: 5rem; }
+
 /* ── After: compact footer and smaller demo CTA reserve (#9227) ── */
-.opt-footer .content { padding-bottom: 3.25rem; }
 .opt-footer .app-foot { padding: 0.25rem 1rem; }
+.demo-mode.opt-footer .content { padding-bottom: 3.25rem; }
 
 /* ── After: full width for table-only views ───────────────────── */
 .opt-width .view-list .content { max-width: none; margin-inline: 0; }
@@ -227,7 +232,7 @@
 @media (max-width: 1023px) {
   .app, .app.sidebar-collapsed { grid-template-columns: minmax(0, 1fr); }
   .sidebar { display: none; }
-  .content { padding: 1rem 1rem 5rem; }
+  .content { padding: 1rem; }
   .topbar { padding: 0 0.75rem; }
   .topbar-right > :not(.icon-btn) { display: none; }
 }
