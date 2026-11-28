@@ -51,6 +51,7 @@ function loadCreateCommand(): CreateCommand {
 function buildEm() {
   let idCounter = 0
   const em: Record<string, unknown> = {
+    execute: jest.fn(async () => undefined),
     findOne: jest.fn().mockResolvedValue(null),
     find: jest.fn().mockResolvedValue([]),
     create: jest.fn().mockImplementation((_entity: unknown, payload: Record<string, unknown>) => ({
@@ -203,15 +204,14 @@ describe('bulk-created categories still emit the command\'s normal CRUD side eff
     const suppressionFlags = commandBus.execute.mock.calls.map(([, { ctx }]: [string, { ctx: { bulkImport?: { skipDerivedRebuild?: boolean } } }]) => ctx.bulkImport?.skipDerivedRebuild)
     expect(suppressionFlags).toEqual([true, true, true])
 
-    // The deferred rebuild's own `em.find(CatalogProductCategory, { organizationId, tenantId, deletedAt: null }, …)`
-    // is the only unfiltered, batch-wide query this scenario produces — pre-validation's slug/parent
-    // lookups are both skipped because none of the three rows sets a slug or a parentId. So a call
-    // count of exactly 1 proves the rebuild ran once for the whole batch, not once per row.
-    expect(em.find).toHaveBeenCalledTimes(1)
-    expect(em.find).toHaveBeenCalledWith(
+    const find = jest.mocked(em.find as (...args: unknown[]) => Promise<unknown[]>)
+    const rebuildQueries = find.mock.calls.filter(([, , options]) => (
+      typeof options === 'object' && options !== null && 'orderBy' in options
+    ))
+    expect(rebuildQueries).toEqual([[
       expect.anything(),
       { organizationId: ORG, tenantId: TENANT, deletedAt: null },
       expect.objectContaining({ orderBy: { name: 'ASC' } }),
-    )
+    ]])
   })
 })

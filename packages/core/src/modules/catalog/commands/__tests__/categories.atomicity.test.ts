@@ -2,6 +2,12 @@ export {}
 
 const registerCommand = jest.fn()
 const setCustomFieldsIfAny = jest.fn().mockResolvedValue(undefined)
+const loadCustomFieldSnapshot = jest.fn().mockResolvedValue({})
+
+jest.mock('@open-mercato/shared/lib/commands/customFieldSnapshots', () => ({
+  ...jest.requireActual('@open-mercato/shared/lib/commands/customFieldSnapshots'),
+  loadCustomFieldSnapshot,
+}))
 
 jest.mock('@open-mercato/shared/lib/commands', () => ({
   registerCommand,
@@ -38,6 +44,7 @@ function buildEm(opts: { rejectFlushOnCall?: number } = {}) {
   const calls: string[] = []
   let flushCount = 0
   const em: Record<string, unknown> = {
+    execute: jest.fn(async () => { calls.push('lock') }),
     findOne: jest.fn().mockResolvedValue(null),
     find: jest.fn().mockImplementation(async () => {
       calls.push('find')
@@ -114,9 +121,36 @@ describe('catalog.categories.create atomicity', () => {
     expect(em.commit).toHaveBeenCalledTimes(1)
     expect(em.rollback).not.toHaveBeenCalled()
     // Hierarchy rebuild query must run inside the transaction (after begin, before commit).
-    expect(calls.indexOf('begin')).toBeLessThan(calls.indexOf('find'))
+    expect(em.execute).toHaveBeenCalledWith('select pg_advisory_xact_lock(hashtextextended(?, 0))', [
+      `catalog:category-hierarchy:${TENANT}:${ORG}`,
+    ])
+    expect(calls.indexOf('begin')).toBeLessThan(calls.indexOf('lock'))
+    expect(calls.indexOf('lock')).toBeLessThan(calls.indexOf('flush'))
     expect(calls.indexOf('find')).toBeLessThan(calls.indexOf('commit'))
     expect(dataEngine.markOrmEntityChange).toHaveBeenCalled()
+  })
+
+  it('writes and snapshots initial custom fields before committing', async () => {
+    const command = loadCommand('catalog.categories.create')
+    const em = buildEm()
+    const { ctx } = buildCtx(em)
+    const calls = em.__calls as string[]
+    setCustomFieldsIfAny.mockImplementationOnce(async () => { calls.push('write custom fields') })
+    loadCustomFieldSnapshot.mockImplementationOnce(async () => {
+      calls.push('snapshot custom fields')
+      return { season: 'winter' }
+    })
+
+    await command.execute({ ...createInput, cf_season: 'winter' }, ctx)
+
+    expect(setCustomFieldsIfAny).toHaveBeenCalledWith(expect.objectContaining({
+      transactionalEm: em,
+      values: { season: 'winter' },
+    }))
+    expect(loadCustomFieldSnapshot).toHaveBeenCalledWith(em, expect.any(Object))
+    expect(calls.indexOf('lock')).toBeLessThan(calls.indexOf('write custom fields'))
+    expect(calls.indexOf('write custom fields')).toBeLessThan(calls.indexOf('snapshot custom fields'))
+    expect(calls.indexOf('snapshot custom fields')).toBeLessThan(calls.indexOf('commit'))
   })
 
   it('rolls back the entity write when the hierarchy rebuild flush fails', async () => {
